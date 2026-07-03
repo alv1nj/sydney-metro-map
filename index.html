@@ -166,6 +166,8 @@
   .reaBtn .rt .t1 { display:block; font-size:13.5px; font-weight:800; }
   .reaBtn .rt .t2 { display:block; font-size:10px; opacity:.8; font-weight:500; margin-top:1px; }
   .reaBtn .ra { flex:none; font-size:15px; font-weight:700; opacity:.85; }
+  .reaBtn.gmap { background:linear-gradient(135deg,#4285f4,#1a73e8);
+    box-shadow:0 3px 10px rgba(26,115,232,.3); }
 
   #sheet .foot { font-size:10px; color:var(--ink3); margin-top:11px; line-height:1.5; }
   #closeSheet { position:absolute; right:14px; top:14px; border:none;
@@ -581,15 +583,22 @@ const REA_SUBURB = {
   abp:"Badgerys Creek", att:"Badgerys Creek",
 };
 const REA_PC = { mu:2113 }; // 麦考瑞大学站按 Macquarie Park 2113 搜索
-function reaBtnHtml(s){
+function linkBtnsHtml(s){
   const suburb = REA_SUBURB[s.id] || s.en;
   const pc = REA_PC[s.id] || s.pc;
   const slug = suburb.toLowerCase().replace(/ /g,"+");
-  const url = `https://www.realestate.com.au/rent/in-${slug},+nsw+${pc}/list-1`;
-  return `<a class="reaBtn" href="${url}" target="_blank" rel="noopener">
+  const reaUrl = `https://www.realestate.com.au/rent/in-${slug},+nsw+${pc}/map-1`;
+  const gq = encodeURIComponent(`${s.en} Metro Station, NSW ${s.pc}, Australia`);
+  const gUrl = `https://www.google.com/maps/search/?api=1&query=${gq}`;
+  return `<a class="reaBtn" href="${reaUrl}" target="_blank" rel="noopener">
     <span class="ri">🏠</span>
-    <span class="rt"><span class="t1">查看本站周边租房 · ${suburb}</span>
-    <span class="t2">realestate.com.au · 已装 App 将直接唤起</span></span>
+    <span class="rt"><span class="t1">周边租房地图 · ${suburb}</span>
+    <span class="t2">realestate.com.au 地图模式 · 已装 App 将直接唤起</span></span>
+    <span class="ra">↗</span></a>
+  <a class="reaBtn gmap" href="${gUrl}" target="_blank" rel="noopener">
+    <span class="ri">📍</span>
+    <span class="rt"><span class="t1">车站位置 · Google 地图</span>
+    <span class="t2">已装 Google Maps App 将直接唤起并定位车站</span></span>
     <span class="ra">↗</span></a>`;
 }
 
@@ -783,7 +792,7 @@ function showSheet(s, asOrigin){
       <div class="k">乘车至市中心 · CENTRAL / CBD</div>
       <div class="v">${tView}</div></div></div>`;
   html+=lgaCardHtml(s);
-  html+=reaBtnHtml(s);
+  html+=linkBtnsHtml(s);
 
   if(s.line==="m1"){
     html+=`<div class="dirWrap">`+m1Times(s.id).map(d=>`
