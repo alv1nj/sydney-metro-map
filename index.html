@@ -155,6 +155,18 @@
   .safeBadge { font-size:10.5px; font-weight:800; color:#fff; border-radius:8px;
     padding:1.5px 8px; margin-right:6px; white-space:nowrap; }
 
+  /* ── realestate 跳转按钮 ── */
+  .reaBtn { display:flex; align-items:center; gap:10px; text-decoration:none;
+    background:linear-gradient(135deg,#e4002b,#c30023); color:#fff;
+    border-radius:14px; padding:12px 15px; margin-bottom:10px;
+    box-shadow:0 3px 10px rgba(228,0,43,.3); }
+  .reaBtn:active { transform:scale(.985); }
+  .reaBtn .ri { font-size:19px; flex:none; }
+  .reaBtn .rt { flex:1; }
+  .reaBtn .rt .t1 { display:block; font-size:13.5px; font-weight:800; }
+  .reaBtn .rt .t2 { display:block; font-size:10px; opacity:.8; font-weight:500; margin-top:1px; }
+  .reaBtn .ra { flex:none; font-size:15px; font-weight:700; opacity:.85; }
+
   #sheet .foot { font-size:10px; color:var(--ink3); margin-top:11px; line-height:1.5; }
   #closeSheet { position:absolute; right:14px; top:14px; border:none;
     background:rgba(0,0,0,.06); width:29px; height:29px; border-radius:50%;
@@ -561,6 +573,26 @@ const LGAS = {
     eth:"澳洲裔 15.6% · 英格兰裔 12.2% · 印度裔 6.0% · 黎巴嫩裔 5.9%",
     lang:"阿拉伯语 13.1% · 越南语 5.3% · 印地语 3.4%" },
 };
+// realestate.com.au 租房搜索：站点 → 挂牌郊区（默认用站点英文名，特殊站覆盖）
+const REA_SUBURB = {
+  tal:"Rouse Hill", hs:"Castle Hill", mu:"Macquarie Park",
+  vc:"North Sydney", bar:"Barangaroo", mpl:"Sydney", gad:"Sydney",
+  cen:"Haymarket", tb:"Rozelle", hun:"Sydney",
+  abp:"Badgerys Creek", att:"Badgerys Creek",
+};
+const REA_PC = { mu:2113 }; // 麦考瑞大学站按 Macquarie Park 2113 搜索
+function reaBtnHtml(s){
+  const suburb = REA_SUBURB[s.id] || s.en;
+  const pc = REA_PC[s.id] || s.pc;
+  const slug = suburb.toLowerCase().replace(/ /g,"+");
+  const url = `https://www.realestate.com.au/rent/in-${slug},+nsw+${pc}/list-1`;
+  return `<a class="reaBtn" href="${url}" target="_blank" rel="noopener">
+    <span class="ri">🏠</span>
+    <span class="rt"><span class="t1">查看本站周边租房 · ${suburb}</span>
+    <span class="t2">realestate.com.au · 已装 App 将直接唤起</span></span>
+    <span class="ra">↗</span></a>`;
+}
+
 function safetyOf(v){
   if(v===null) return {label:"见备注", color:"#e07b1f"};
   if(v<500)  return {label:"治安 优", color:"#2e7d32"};
@@ -751,6 +783,7 @@ function showSheet(s, asOrigin){
       <div class="k">乘车至市中心 · CENTRAL / CBD</div>
       <div class="v">${tView}</div></div></div>`;
   html+=lgaCardHtml(s);
+  html+=reaBtnHtml(s);
 
   if(s.line==="m1"){
     html+=`<div class="dirWrap">`+m1Times(s.id).map(d=>`
