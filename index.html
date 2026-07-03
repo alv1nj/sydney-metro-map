@@ -614,15 +614,15 @@ function linkBtnsHtml(s){
   const suburb = REA_SUBURB[s.id] || s.en;
   const pc = REA_PC[s.id] || s.pc;
   const slug = suburb.toLowerCase().replace(/ /g,"+");
-  // 默认筛选：rent · 全部房型 · ≤$950/周 · 1房+ · 1卫+ · 1车位+
-  const reaUrl = `https://www.realestate.com.au/rent/with-1-bedroom-between-0-950-in-${slug},+nsw+${pc}/map-1?numBaths=1&numParkingSpaces=1`;
+  // 默认筛选：rent · 全部房型 · ≤$950/周 · 2房+ · 1卫+ · 1车位+
+  const reaUrl = `https://www.realestate.com.au/rent/with-2-bedrooms-between-0-950-in-${slug},+nsw+${pc}/map-1?numBaths=1&numParkingSpaces=1`;
   const gq = encodeURIComponent(`${s.en} Metro Station, NSW ${s.pc}, Australia`);
   const gUrl = `https://www.google.com/maps/search/?api=1&query=${gq}`;
   return `<a class="reaBtn" href="${reaUrl}" target="_blank" rel="noopener"
     onclick="event.preventDefault();event.stopPropagation();openExt(this.href);return false;">
     <span class="ri">🏠</span>
     <span class="rt"><span class="t1">周边租房地图 · ${suburb}</span>
-    <span class="t2">≤$950/周 · 1房+ 1卫+ 1车位+ · 全部房型 · 地图模式</span></span>
+    <span class="t2">≤$950/周 · 2房+ 1卫+ 1车位+ · 全部房型 · 地图模式</span></span>
     <span class="ra">↗</span></a>
   <a class="reaBtn gmap" href="${gUrl}" target="_blank" rel="noopener">
     <span class="ri">📍</span>
