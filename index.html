@@ -5,10 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0e5a5e">
+<meta name="theme-color" content="#a50f2c">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
 <title>悉尼 Metro 线路图</title>
 <style>
   :root {
+    --red:#d7153a; --red-dark:#8f0c24;
     --teal:#168388; --teal-dark:#0e5a5e;
     --west:#7d3fe0; --air:#ee6b22;
     --ink:#1d1d1f; --ink2:#6e6e73; --ink3:#aeaeb2;
@@ -23,19 +26,19 @@
 
   /* ── 顶栏 ── */
   header {
-    background:linear-gradient(135deg,#0d4f53 0%,#168388 60%,#1a9aa0 100%);
+    background:linear-gradient(135deg,var(--red-dark) 0%,var(--red) 62%,#ee3a5d 100%);
     color:#fff; padding:12px 16px calc(12px);
     padding-top:calc(12px + env(safe-area-inset-top));
     display:flex; align-items:center; gap:12px; z-index:30;
-    box-shadow:0 1px 0 rgba(255,255,255,.15) inset, 0 4px 18px rgba(13,79,83,.35);
+    box-shadow:0 1px 0 rgba(255,255,255,.15) inset, 0 4px 18px rgba(143,12,36,.35);
   }
   .roundel {
     width:38px; height:38px; border-radius:50%; flex:none;
-    background:#fff; color:var(--teal);
+    background:#fff;
     display:flex; align-items:center; justify-content:center;
-    font-weight:800; font-size:20px; font-family:"SF Pro Display",-apple-system,sans-serif;
     box-shadow:0 2px 6px rgba(0,0,0,.25);
   }
+  .roundel svg { width:26px; height:26px; display:block; }
   header .titles { flex:1; min-width:0; }
   header h1 { font-size:17px; font-weight:700; letter-spacing:.3px; }
   header .sub { font-size:11px; opacity:.75; margin-top:1px; font-weight:500; letter-spacing:.2px; }
@@ -193,7 +196,13 @@
 <body>
 <div id="app">
   <header>
-    <div class="roundel">M</div>
+    <div class="roundel"><svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <g fill="#d7153a">
+        <path d="M8,70 C14,40 34,22 52,20 C40,38 34,54 32,70 Z"/>
+        <path d="M36,70 C42,44 58,28 74,26 C64,42 58,56 56,70 Z"/>
+        <path d="M60,70 C66,50 78,38 90,36 C84,48 80,60 78,70 Z"/>
+        <rect x="6" y="74" width="88" height="6" rx="3"/>
+      </g></svg></div>
     <div class="titles">
       <h1>悉尼 Metro 线路图</h1>
       <div class="sub">Sydney Metro Network · 含在建线路 · 2026年7月</div>
