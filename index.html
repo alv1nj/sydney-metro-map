@@ -575,6 +575,20 @@ const LGAS = {
     eth:"澳洲裔 15.6% · 英格兰裔 12.2% · 印度裔 6.0% · 黎巴嫩裔 5.9%",
     lang:"阿拉伯语 13.1% · 越南语 5.3% · 印地语 3.4%" },
 };
+// 打开外部链接：App 接管后留下的空白标签页，在用户返回本页时自动关闭
+function openExt(url){
+  const w = window.open(url, "_blank");
+  if(!w){ location.href = url; return; }
+  const h = () => {
+    if(!document.hidden){
+      try{ w.close(); }catch(e){}
+      document.removeEventListener("visibilitychange", h);
+    }
+  };
+  document.addEventListener("visibilitychange", h);
+  setTimeout(()=>document.removeEventListener("visibilitychange", h), 120000);
+}
+
 // realestate.com.au 租房搜索：站点 → 挂牌郊区（默认用站点英文名，特殊站覆盖）
 const REA_SUBURB = {
   tal:"Rouse Hill", hs:"Castle Hill", mu:"Macquarie Park",
@@ -592,7 +606,7 @@ function linkBtnsHtml(s){
   const gq = encodeURIComponent(`${s.en} Metro Station, NSW ${s.pc}, Australia`);
   const gUrl = `https://www.google.com/maps/search/?api=1&query=${gq}`;
   return `<a class="reaBtn" href="${reaUrl}" target="_blank" rel="noopener"
-    onclick="event.preventDefault();event.stopPropagation();window.open(this.href,'_blank');return false;">
+    onclick="event.preventDefault();event.stopPropagation();openExt(this.href);return false;">
     <span class="ri">🏠</span>
     <span class="rt"><span class="t1">周边租房地图 · ${suburb}</span>
     <span class="t2">≤$950/周 · 1房+ 1卫+ 1车位+ · 全部房型 · 地图模式</span></span>
