@@ -546,6 +546,7 @@ function drawJourney(r){
   marker($id(r.to),"#ff3b30","终");
 }
 function onTap(s){
+  if(dragMoved) return;                          // 拖动后松手不算点按
   if(activeRoute){ clearPlan(); }               // 路线中再点站 → 重新开始
   if(!origin){                                   // 第一次点按：设为出发站
     origin=s.id; marker(s,"#34c759","起"); showSheet(s,true); return;
@@ -659,7 +660,12 @@ function showSheet(s, asOrigin){
   sheet.classList.add("show");
 }
 document.getElementById("closeSheet").onclick=()=>sheet.classList.remove("show");
-svg.addEventListener("click",()=>sheet.classList.remove("show"));
+// 点按地图空白/变暗区域：路线显示中 → 清除路线；否则仅收起卡片
+svg.addEventListener("click",()=>{
+  if(dragMoved) return;            // 拖动平移后松手不算点按
+  if(activeRoute) clearPlan();
+  sheet.classList.remove("show");
+});
 
 // ════════ 缩放 / 平移 ════════
 const VB={x:0,y:0,w:780,h:1000};
@@ -678,10 +684,11 @@ document.getElementById("zreset").onclick=()=>{vb={...VB};apply();};
 svg.addEventListener("wheel",e=>{e.preventDefault();
   const p=pt(e.clientX,e.clientY); zoomAt(e.deltaY>0?1.12:0.9,p.x,p.y);},{passive:false});
 
-let drag=null,pinch=null;
-svg.addEventListener("pointerdown",e=>{drag={x:e.clientX,y:e.clientY,vx:vb.x,vy:vb.y};});
+let drag=null,pinch=null,dragMoved=false;
+svg.addEventListener("pointerdown",e=>{dragMoved=false;drag={x:e.clientX,y:e.clientY,vx:vb.x,vy:vb.y};});
 svg.addEventListener("pointermove",e=>{
   if(!drag||pinch)return;
+  if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>6) dragMoved=true;
   const r=svg.getBoundingClientRect();
   vb.x=drag.vx-(e.clientX-drag.x)/r.width*vb.w;
   vb.y=drag.vy-(e.clientY-drag.y)/r.height*vb.h; apply();
