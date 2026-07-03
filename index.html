@@ -576,18 +576,30 @@ const LGAS = {
     eth:"澳洲裔 15.6% · 英格兰裔 12.2% · 印度裔 6.0% · 黎巴嫩裔 5.9%",
     lang:"阿拉伯语 13.1% · 越南语 5.3% · 印地语 3.4%" },
 };
-// 打开外部链接：App 接管后留下的空白标签页，在用户返回本页时自动关闭
+// 打开外部链接：App 接管后留下的 about:blank 空白页自动清理。
+// 判据：窗口仍停在 about:blank（同源可读）→ App 已接管，安全关闭；
+// 跨域异常 → REA 网页真实加载了，保留不关。
+const extWins = [];
+function sweepExtWins(){
+  for(let i = extWins.length - 1; i >= 0; i--){
+    const w = extWins[i];
+    let remove = false;
+    if(w.closed){ remove = true; }
+    else {
+      try { if(w.location.href === "about:blank"){ w.close(); remove = true; } }
+      catch(e){ remove = true; }   // 已导航到外站：保留窗口，仅停止跟踪
+    }
+    if(remove) extWins.splice(i, 1);
+  }
+}
+["pageshow","focus"].forEach(ev => window.addEventListener(ev, sweepExtWins));
+document.addEventListener("visibilitychange", () => { if(!document.hidden) sweepExtWins(); });
 function openExt(url){
   const w = window.open(url, "_blank");
   if(!w){ location.href = url; return; }
-  const h = () => {
-    if(!document.hidden){
-      try{ w.close(); }catch(e){}
-      document.removeEventListener("visibilitychange", h);
-    }
-  };
-  document.addEventListener("visibilitychange", h);
-  setTimeout(()=>document.removeEventListener("visibilitychange", h), 120000);
+  extWins.push(w);
+  setTimeout(sweepExtWins, 3000);   // 页面未离开时（桌面端）3秒后直接清
+  setTimeout(sweepExtWins, 10000);  // 兜底
 }
 
 // realestate.com.au 租房搜索：站点 → 挂牌郊区（默认用站点英文名，特殊站覆盖）
