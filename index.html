@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0e5a5e">
+<title>悉尼 Metro 线路图</title>
+<style>
+  :root {
+    --teal:#168388; --teal-dark:#0e5a5e;
+    --west:#7d3fe0; --air:#ee6b22;
+    --ink:#1d1d1f; --ink2:#6e6e73; --ink3:#aeaeb2;
+    --paper:#f7f6f2;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { height:100%; overflow:hidden;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang SC","Helvetica Neue",sans-serif;
+    background:var(--paper); color:var(--ink);
+    -webkit-font-smoothing:antialiased; }
+  #app { display:flex; flex-direction:column; height:100%; height:100dvh; }
+
+  /* ── 顶栏 ── */
+  header {
+    background:linear-gradient(135deg,#0d4f53 0%,#168388 60%,#1a9aa0 100%);
+    color:#fff; padding:12px 16px calc(12px);
+    padding-top:calc(12px + env(safe-area-inset-top));
+    display:flex; align-items:center; gap:12px; z-index:30;
+    box-shadow:0 1px 0 rgba(255,255,255,.15) inset, 0 4px 18px rgba(13,79,83,.35);
+  }
+  .roundel {
+    width:38px; height:38px; border-radius:50%; flex:none;
+    background:#fff; color:var(--teal);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:800; font-size:20px; font-family:"SF Pro Display",-apple-system,sans-serif;
+    box-shadow:0 2px 6px rgba(0,0,0,.25);
+  }
+  header .titles { flex:1; min-width:0; }
+  header h1 { font-size:17px; font-weight:700; letter-spacing:.3px; }
+  header .sub { font-size:11px; opacity:.75; margin-top:1px; font-weight:500; letter-spacing:.2px; }
+  #legendBtn {
+    background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.35);
+    color:#fff; border-radius:18px; padding:6px 14px; font-size:13px; font-weight:600;
+    backdrop-filter:blur(8px);
+  }
+
+  #mapWrap { flex:1; position:relative; overflow:hidden; touch-action:none;
+    background:
+      radial-gradient(1200px 800px at 75% 30%, #ffffff 0%, transparent 60%),
+      var(--paper); }
+  svg { width:100%; height:100%; display:block; cursor:grab; }
+
+  /* ── 玻璃面板通用 ── */
+  .glass {
+    background:rgba(255,255,255,.78);
+    backdrop-filter:blur(16px) saturate(1.5);
+    -webkit-backdrop-filter:blur(16px) saturate(1.5);
+    border:1px solid rgba(0,0,0,.06);
+    box-shadow:0 8px 28px rgba(20,40,50,.14), 0 1px 0 rgba(255,255,255,.9) inset;
+  }
+
+  /* ── 图例 ── */
+  #legend {
+    position:absolute; top:12px; left:12px; z-index:20;
+    border-radius:16px; padding:13px 15px;
+    font-size:12.5px; line-height:2.05; max-width:238px; display:none;
+  }
+  #legend.show { display:block; }
+  #legend .row { display:flex; align-items:center; gap:10px; font-weight:500; }
+  #legend .sw { width:28px; height:6px; border-radius:3px; flex:none; }
+  #legend .swd { width:28px; height:0; border-top:5px dashed; border-radius:3px; flex:none; }
+  #legend .zoneSw { width:28px; height:15px; border-radius:4px; flex:none;
+    background:rgba(22,131,136,.10); border:1.5px dashed #9aa0a6; }
+  #legend .yr { margin-left:auto; font-size:10px; font-weight:700; color:#fff;
+    border-radius:8px; padding:1px 7px; }
+  #legend .note { font-size:10.5px; color:var(--ink2); line-height:1.55; margin-top:8px;
+    border-top:1px solid rgba(0,0,0,.08); padding-top:8px; font-weight:400; }
+
+  /* ── 缩放控件 ── */
+  #zoomCtrl {
+    position:absolute; right:12px; bottom:calc(16px + env(safe-area-inset-bottom)); z-index:20;
+    border-radius:22px; overflow:hidden; display:flex; flex-direction:column;
+  }
+  #zoomCtrl button {
+    width:44px; height:44px; border:none; background:transparent;
+    font-size:19px; color:var(--teal-dark); font-weight:600;
+  }
+  #zoomCtrl button:not(:last-child){ border-bottom:1px solid rgba(0,0,0,.07); }
+  #zoomCtrl button:active { background:rgba(22,131,136,.12); }
+
+  /* ── 底部详情卡 ── */
+  #sheet {
+    position:absolute; left:10px; right:10px;
+    bottom:calc(10px + env(safe-area-inset-bottom)); z-index:40;
+    border-radius:22px; padding:16px 18px 18px;
+    transform:translateY(calc(100% + 40px));
+    transition:transform .45s cubic-bezier(.32,.72,.24,1);
+    max-height:64%; overflow-y:auto;
+  }
+  #sheet.show { transform:translateY(0); }
+  #sheet .accent { position:absolute; left:0; top:0; bottom:0; width:5px;
+    border-radius:22px 0 0 22px; }
+  #sheet .handle { width:36px; height:4.5px; background:rgba(0,0,0,.15);
+    border-radius:3px; margin:0 auto 12px; }
+  #sheet h2 { font-size:21px; font-weight:800; letter-spacing:.2px; }
+  #sheet .en { font-size:13px; color:var(--ink2); margin:2px 0 10px; font-weight:500; }
+  #sheet .badges { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+  .badge { font-size:11px; font-weight:600; padding:4px 11px; border-radius:20px; color:#fff;
+    box-shadow:0 1px 3px rgba(0,0,0,.15); }
+  .badge.outline { background:#fff !important; box-shadow:none; }
+
+  .cbdCard { display:flex; align-items:center; gap:12px;
+    background:rgba(22,131,136,.08); border:1px solid rgba(22,131,136,.18);
+    border-radius:14px; padding:11px 14px; margin-bottom:10px; }
+  .cbdCard .icon { font-size:20px; }
+  .cbdCard .k { font-size:10.5px; color:var(--ink2); font-weight:600; letter-spacing:.3px; }
+  .cbdCard .v { font-size:16px; font-weight:800; margin-top:1px; }
+  .cbdCard .v small { font-size:11px; font-weight:500; color:var(--ink2); }
+
+  .dirWrap { display:flex; flex-direction:column; gap:8px; }
+  .dirCard { border-radius:14px; padding:10px 14px 11px;
+    background:rgba(0,0,0,.035); border:1px solid rgba(0,0,0,.06); }
+  .dirCard .dirName { font-size:12px; font-weight:700; display:flex; align-items:center; gap:6px; }
+  .dirCard .arrow { display:inline-flex; width:18px; height:18px; border-radius:50%;
+    color:#fff; align-items:center; justify-content:center; font-size:11px; flex:none; }
+  .dirCard .times { display:flex; gap:0; margin-top:7px; }
+  .dirCard .tcol { flex:1; }
+  .dirCard .tcol:first-child { border-right:1px solid rgba(0,0,0,.08); }
+  .dirCard .tcol:last-child { padding-left:14px; }
+  .dirCard .tk { font-size:10px; color:var(--ink2); font-weight:600; }
+  .dirCard .tv { font-size:19px; font-weight:800; font-variant-numeric:tabular-nums;
+    margin-top:1px; letter-spacing:.3px; }
+  .dirCard .tv small { font-size:10.5px; color:var(--ink3); font-weight:600; margin-left:2px; }
+
+  .naCard { border-radius:14px; padding:13px 15px; background:rgba(0,0,0,.035);
+    border:1px dashed rgba(0,0,0,.15); font-size:13px; color:var(--ink2);
+    font-weight:500; line-height:1.55; }
+  .naCard b { color:var(--ink); }
+
+  #sheet .foot { font-size:10px; color:var(--ink3); margin-top:11px; line-height:1.5; }
+  #closeSheet { position:absolute; right:14px; top:14px; border:none;
+    background:rgba(0,0,0,.06); width:29px; height:29px; border-radius:50%;
+    font-size:13px; color:var(--ink2); font-weight:700; }
+
+  .stn { cursor:pointer; }
+  .zoneLabel { font-weight:800; pointer-events:none; letter-spacing:1.2px;
+    text-transform:uppercase; }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="roundel">M</div>
+    <div class="titles">
+      <h1>悉尼 Metro 线路图</h1>
+      <div class="sub">Sydney Metro Network · 含在建线路 · 2026年7月</div>
+    </div>
+    <button id="legendBtn">图例</button>
+  </header>
+
+  <div id="mapWrap">
+    <div id="legend" class="glass show">
+      <div class="row"><span class="sw" style="background:var(--teal)"></span>M1 西北 & 城市线<span class="yr" style="background:#2e7d32">已通车</span></div>
+      <div class="row"><span class="swd" style="border-color:var(--teal)"></span>M1 西南延伸<span class="yr" style="background:var(--teal)">2026</span></div>
+      <div class="row"><span class="swd" style="border-color:var(--air)"></span>西悉尼机场线<span class="yr" style="background:var(--air)">2027</span></div>
+      <div class="row"><span class="swd" style="border-color:var(--west)"></span>Metro West<span class="yr" style="background:var(--west)">2032</span></div>
+      <div class="row"><span class="zoneSw"></span>区域分界线</div>
+      <div class="note">点击站点查看所在区域、至市中心时间及<b>分方向</b>首末班车。示意图，非精确比例。</div>
+    </div>
+
+    <div id="zoomCtrl" class="glass">
+      <button id="zin">＋</button>
+      <button id="zout">－</button>
+      <button id="zreset" style="font-size:15px">⟲</button>
+    </div>
+
+    <svg id="map" viewBox="0 0 780 1000" xmlns="http://www.w3.org/2000/svg"></svg>
+
+    <div id="sheet" class="glass">
+      <div class="accent" id="sAccent"></div>
+      <div class="handle"></div>
+      <button id="closeSheet">✕</button>
+      <h2 id="sName"></h2>
+      <div class="en" id="sEn"></div>
+      <div class="badges" id="sBadges"></div>
+      <div id="sBody"></div>
+      <div class="foot" id="sFoot"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+// ════════ 数据 ════════
+const LINES = {
+  m1:   { name:"M1 西北 & 城市线", color:"#168388", open:true },
+  m1sw: { name:"M1 西南延伸段", color:"#168388", open:false, year:"2026",
+          note:"预计 2026 年下半年通车（官方目标 10 月）" },
+  air:  { name:"西悉尼机场线", color:"#ee6b22", open:false, year:"2027",
+          note:"原定 2026 年，已推迟至 2027 年" },
+  west: { name:"Metro West", color:"#7d3fe0", open:false, year:"2032",
+          note:"预计 2032 年通车" },
+};
+
+// zone: 区域  t: 至市中心分钟
+const STATIONS = [
+  // ── M1 已通车段 ──
+  {id:"tal", line:"m1", x:150, y:100, name:"塔拉旺", en:"Tallawong", zone:"hills", t:52, lbl:"right", term:true},
+  {id:"rh",  line:"m1", x:188, y:132, name:"劳斯山", en:"Rouse Hill", zone:"hills", t:49, lbl:"right"},
+  {id:"kel", line:"m1", x:222, y:162, name:"凯利维尔", en:"Kellyville", zone:"hills", t:46, lbl:"right"},
+  {id:"bv",  line:"m1", x:256, y:192, name:"贝拉维斯塔", en:"Bella Vista", zone:"hills", t:43, lbl:"right"},
+  {id:"nw",  line:"m1", x:290, y:222, name:"诺韦斯特", en:"Norwest", zone:"hills", t:41, lbl:"right"},
+  {id:"hs",  line:"m1", x:324, y:252, name:"山区展览场", en:"Hills Showground", zone:"hills", t:38, lbl:"right"},
+  {id:"ch",  line:"m1", x:358, y:282, name:"城堡山", en:"Castle Hill", zone:"hills", t:36, lbl:"right"},
+  {id:"cb",  line:"m1", x:396, y:312, name:"樱桃溪", en:"Cherrybrook", zone:"hills", t:33, lbl:"right"},
+  {id:"epp", line:"m1", x:444, y:348, name:"艾平", en:"Epping", zone:"ryde", t:29, lbl:"top", hub:true},
+  {id:"mu",  line:"m1", x:492, y:375, name:"麦考瑞大学", en:"Macquarie University", zone:"ryde", t:25, lbl:"top"},
+  {id:"mp",  line:"m1", x:534, y:396, name:"麦考瑞公园", en:"Macquarie Park", zone:"ryde", t:23, lbl:"top"},
+  {id:"nr",  line:"m1", x:574, y:416, name:"北莱德", en:"North Ryde", zone:"ryde", t:21, lbl:"top"},
+  {id:"cw",  line:"m1", x:652, y:428, name:"车士活", en:"Chatswood", zone:"north", t:16, lbl:"right", hub:true},
+  {id:"cn",  line:"m1", x:664, y:492, name:"克罗斯奈斯特", en:"Crows Nest", zone:"north", t:12, lbl:"right"},
+  {id:"vc",  line:"m1", x:668, y:534, name:"维多利亚十字 · 北悉尼", en:"Victoria Cross", zone:"north", t:10, lbl:"right"},
+  {id:"bar", line:"m1", x:652, y:602, name:"巴兰加鲁", en:"Barangaroo", zone:"cbd", t:7, lbl:"left"},
+  {id:"mpl", line:"m1", x:678, y:640, name:"马丁广场", en:"Martin Place", zone:"cbd", t:2, lbl:"right"},
+  {id:"gad", line:"m1", x:674, y:679, name:"加迪加尔", en:"Gadigal", zone:"cbd", t:1, lbl:"right"},
+  {id:"cen", line:"m1", x:662, y:718, name:"中央站", en:"Central", zone:"cbd", t:0, lbl:"right", hub:true},
+  {id:"wat", line:"m1", x:672, y:762, name:"滑铁卢", en:"Waterloo", zone:"cbd", t:3, lbl:"right"},
+  {id:"syd", line:"m1", x:622, y:822, name:"悉登汉姆", en:"Sydenham", zone:"inner", t:8, lbl:"bottom", hub:true, term:true},
+  // ── M1 西南延伸 2026 ──
+  {id:"mar", line:"m1sw", x:576, y:838, name:"马利围", en:"Marrickville", zone:"inner", t:11, lbl:"bottom"},
+  {id:"dh",  line:"m1sw", x:532, y:850, name:"达利奇山", en:"Dulwich Hill", zone:"inner", t:13, lbl:"top"},
+  {id:"hp",  line:"m1sw", x:488, y:858, name:"赫斯顿公园", en:"Hurlstone Park", zone:"inner", t:15, lbl:"bottom"},
+  {id:"can", line:"m1sw", x:444, y:864, name:"坎特伯雷", en:"Canterbury", zone:"cbank", t:17, lbl:"top"},
+  {id:"cam", line:"m1sw", x:400, y:870, name:"金宝士", en:"Campsie", zone:"cbank", t:19, lbl:"bottom"},
+  {id:"bel", line:"m1sw", x:356, y:876, name:"贝尔莫", en:"Belmore", zone:"cbank", t:21, lbl:"top"},
+  {id:"lak", line:"m1sw", x:312, y:882, name:"莱肯巴", en:"Lakemba", zone:"cbank", t:23, lbl:"bottom"},
+  {id:"wp",  line:"m1sw", x:268, y:888, name:"威利公园", en:"Wiley Park", zone:"cbank", t:25, lbl:"top"},
+  {id:"pb",  line:"m1sw", x:226, y:894, name:"庞奇堡", en:"Punchbowl", zone:"cbank", t:27, lbl:"bottom"},
+  {id:"bank",line:"m1sw", x:178, y:900, name:"宾士镇", en:"Bankstown", zone:"cbank", t:30, lbl:"top", hub:true, term:true},
+  // ── Metro West 2032 ──
+  {id:"wm",  line:"west", x:150, y:556, name:"西米德", en:"Westmead", zone:"parra", t:24, lbl:"top", hub:true, term:true},
+  {id:"par", line:"west", x:206, y:568, name:"帕拉马塔", en:"Parramatta", zone:"parra", t:20, lbl:"bottom", hub:true},
+  {id:"sop", line:"west", x:292, y:584, name:"悉尼奥林匹克公园", en:"Sydney Olympic Park", zone:"parra", t:16, lbl:"top"},
+  {id:"ns",  line:"west", x:364, y:600, name:"北斯特拉斯菲尔德", en:"North Strathfield", zone:"inner", t:14, lbl:"bottom"},
+  {id:"bn",  line:"west", x:428, y:612, name:"北宝活", en:"Burwood North", zone:"inner", t:12, lbl:"top"},
+  {id:"fd",  line:"west", x:490, y:620, name:"五码头", en:"Five Dock", zone:"inner", t:9, lbl:"bottom"},
+  {id:"tb",  line:"west", x:560, y:624, name:"海湾区", en:"The Bays", zone:"cbd", t:5, lbl:"bottom"},
+  {id:"pyr", line:"west", x:612, y:618, name:"派蒙", en:"Pyrmont", zone:"cbd", t:3, lbl:"bottom"},
+  {id:"hun", line:"west", x:664, y:610, name:"亨特街", en:"Hunter St", zone:"cbd", t:0, lbl:"top", hub:true, term:true},
+  // ── 机场线 2027 ──
+  {id:"stm", line:"air", x:66, y:400, name:"圣玛丽", en:"St Marys", zone:"wsyd", t:52, tNote:"经 T1 换乘", lbl:"right", hub:true, term:true},
+  {id:"oh",  line:"air", x:72, y:478, name:"果园山", en:"Orchard Hills", zone:"wsyd", t:57, tNote:"经 T1 换乘", lbl:"right"},
+  {id:"lud", line:"air", x:78, y:556, name:"卢登纳姆", en:"Luddenham", zone:"wsyd", t:61, tNote:"经 T1 换乘", lbl:"right"},
+  {id:"abp", line:"air", x:84, y:634, name:"机场商务园", en:"Airport Business Park", zone:"wsyd", t:65, tNote:"经 T1 换乘", lbl:"right"},
+  {id:"att", line:"air", x:92, y:712, name:"机场航站楼", en:"Airport Terminal", zone:"wsyd", t:67, tNote:"经 T1 换乘", lbl:"right", hub:true},
+  {id:"bra", line:"air", x:104, y:790, name:"布拉德菲尔德", en:"Bradfield", zone:"wsyd", t:70, tNote:"经 T1 换乘", lbl:"right", term:true},
+];
+
+const ZONES = {
+  hills: { name:"The Hills 山区", color:"#3a7d44",
+    pts:[[100,60],[440,60],[470,330],[340,360],[90,300]], lx:118, ly:90 },
+  ryde:  { name:"Ryde 莱德区", color:"#c99514",
+    pts:[[410,332],[620,332],[620,450],[410,440]], lx:420, ly:452 },
+  north: { name:"North Shore 北岸", color:"#2563ab",
+    pts:[[624,336],[760,360],[760,568],[630,562]], lx:648, ly:354 },
+  cbd:   { name:"CBD & Inner City 市中心", color:"#b93838",
+    pts:[[540,574],[760,576],[760,790],[610,790],[540,700]], lx:618, ly:776 },
+  inner: { name:"Inner West 内西区", color:"#7a4bab",
+    pts:[[330,578],[534,578],[534,696],[640,780],[640,872],[440,846],[330,690]], lx:342, ly:664 },
+  cbank: { name:"Canterbury-Bankstown 坎特伯雷-宾士镇", color:"#b0447c",
+    pts:[[130,846],[470,846],[470,942],[130,942]], lx:142, ly:936 },
+  parra: { name:"Parramatta 帕拉马塔区", color:"#0d7a8a",
+    pts:[[120,510],[326,522],[326,636],[120,616]], lx:130, ly:534 },
+  wsyd:  { name:"Western Sydney 西悉尼", color:"#c25a17",
+    pts:[[20,360],[116,360],[150,830],[36,830]], lx:30, ly:384 },
+};
+
+// ════════ 工具 ════════
+const svg = document.getElementById("map");
+const NS = "http://www.w3.org/2000/svg";
+const $id = id => STATIONS.find(s=>s.id===id);
+function el(tag, attrs, parent){ const e=document.createElementNS(NS,tag);
+  for(const k in attrs) e.setAttribute(k,attrs[k]); (parent||svg).appendChild(e); return e; }
+
+// 折线 → 圆角平滑路径
+function roundedPath(pts, r, close){
+  const n=pts.length, seg=(a,b)=>Math.hypot(b[0]-a[0],b[1]-a[1]);
+  const lerp=(a,b,t)=>[a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t];
+  let d="";
+  if(close){
+    for(let i=0;i<n;i++){
+      const p=pts[i], prev=pts[(i-1+n)%n], next=pts[(i+1)%n];
+      const r1=Math.min(r, seg(prev,p)/2), r2=Math.min(r, seg(p,next)/2);
+      const a=lerp(p,prev,r1/seg(prev,p)), b=lerp(p,next,r2/seg(p,next));
+      d += (i?`L${a[0]},${a[1]} `:`M${a[0]},${a[1]} `) + `Q${p[0]},${p[1]} ${b[0]},${b[1]} `;
+    }
+    return d+"Z";
+  }
+  d=`M${pts[0][0]},${pts[0][1]} `;
+  for(let i=1;i<n-1;i++){
+    const p=pts[i], prev=pts[i-1], next=pts[i+1];
+    const r1=Math.min(r, seg(prev,p)/2), r2=Math.min(r, seg(p,next)/2);
+    const a=lerp(p,prev,r1/seg(prev,p)), b=lerp(p,next,r2/seg(p,next));
+    d += `L${a[0]},${a[1]} Q${p[0]},${p[1]} ${b[0]},${b[1]} `;
+  }
+  return d+`L${pts[n-1][0]},${pts[n-1][1]}`;
+}
+
+// ════════ 底图：水域 ════════
+const gWater = el("g",{});
+el("path",{d:"M780,536 C720,548 690,556 656,576 C620,597 596,610 566,622 C588,634 620,640 656,632 C700,622 740,600 780,588 Z",
+  fill:"#bcd9e8", opacity:"0.55"},gWater);
+const wLbl=el("text",{x:712,y:566,"font-size":"9.5",fill:"#5b8aa6","font-style":"italic",opacity:"0.9"},gWater);
+wLbl.textContent="Sydney Harbour";
+
+// ════════ 区域 ════════
+const gZones = el("g",{});
+for(const zid in ZONES){
+  const z=ZONES[zid];
+  el("path",{d:roundedPath(z.pts,34,true), fill:z.color, "fill-opacity":"0.065",
+    stroke:z.color,"stroke-opacity":"0.5","stroke-width":"1.4","stroke-dasharray":"6 5"},gZones);
+  const t=el("text",{x:z.lx,y:z.ly,"font-size":"11",fill:z.color,class:"zoneLabel",opacity:"0.55"},gZones);
+  t.textContent=z.name;
+}
+
+// ════════ 线路 ════════
+const ROUTES = {
+  m1:  ["tal","rh","kel","bv","nw","hs","ch","cb","epp","mu","mp","nr","cw","cn","vc","bar","mpl","gad","cen","wat","syd"],
+  m1sw:["syd","mar","dh","hp","can","cam","bel","lak","wp","pb","bank"],
+  air: ["stm","oh","lud","abp","att","bra"],
+  west:["wm","par","sop","ns","bn","fd","tb","pyr","hun"],
+};
+const gLines = el("g",{});
+function drawRoute(key, tag){
+  const L=LINES[key];
+  const pts=ROUTES[key].map(id=>{const s=$id(id);return [s.x,s.y];});
+  const d=roundedPath(pts,16,false);
+  // 白色描边衬底 → 更精致
+  el("path",{d,fill:"none",stroke:"#fff","stroke-width":L.open?10.5:9,
+    "stroke-linecap":"round","stroke-linejoin":"round",opacity:"0.85"},gLines);
+  el("path",{d,fill:"none",stroke:L.color,"stroke-width":L.open?7:5.5,
+    "stroke-linecap":"round","stroke-linejoin":"round",
+    ...(L.open?{}:{"stroke-dasharray":"12 9"})},gLines);
+  if(tag){
+    const mid=$id(ROUTES[key][Math.floor(ROUTES[key].length/2)]);
+    const g=el("g",{},gLines);
+    const w=tag.text.length*7+18;
+    el("rect",{x:mid.x+tag.dx-w/2,y:mid.y+tag.dy-12,width:w,height:22,rx:11,
+      fill:L.color,filter:"url(#softShadow)"},g);
+    const t=el("text",{x:mid.x+tag.dx,y:mid.y+tag.dy+3.5,"text-anchor":"middle",
+      "font-size":"11",fill:"#fff","font-weight":"700","letter-spacing":"0.5"},g);
+    t.textContent=tag.text;
+  }
+}
+// 阴影滤镜
+const defs=el("defs",{});
+const f=el("filter",{id:"softShadow",x:"-40%",y:"-40%",width:"180%",height:"180%"},defs);
+el("feDropShadow",{dx:"0",dy:"1.5",stdDeviation:"2","flood-opacity":"0.3"},f);
+
+drawRoute("m1");
+drawRoute("m1sw",{text:"2026 年通车",dx:0,dy:44});
+drawRoute("air",{text:"2027 年通车",dx:70,dy:-32});
+drawRoute("west",{text:"2032 年通车",dx:-24,dy:40});
+
+// ════════ 站点 ════════
+const gStns = el("g",{});
+for(const s of STATIONS){
+  const g=el("g",{class:"stn"},gStns);
+  const L=LINES[s.line], open=L.open;
+  if(s.hub){
+    el("circle",{cx:s.x,cy:s.y,r:8.5,fill:"#fff",stroke:L.color,"stroke-width":"2.2",
+      filter:"url(#softShadow)",...(open?{}:{"stroke-dasharray":"3.2 2.4"})},g);
+    el("circle",{cx:s.x,cy:s.y,r:4,fill:L.color},g);
+  } else {
+    el("circle",{cx:s.x,cy:s.y,r:5.6,fill:"#fff",stroke:L.color,
+      "stroke-width":"2.6",filter:"url(#softShadow)",
+      ...(open?{}:{"stroke-dasharray":"3 2.2"})},g);
+  }
+  let tx=s.x,ty=s.y,anchor="start";
+  if(s.lbl==="right"){tx=s.x+13;ty=s.y+4;}
+  else if(s.lbl==="left"){tx=s.x-13;ty=s.y+4;anchor="end";}
+  else if(s.lbl==="top"){tx=s.x;ty=s.y-12;anchor="middle";}
+  else {tx=s.x;ty=s.y+20;anchor="middle";}
+  const t=el("text",{x:tx,y:ty,"text-anchor":anchor,"font-size":"11",
+    fill:"#26262a","font-weight":s.hub?"800":"600","paint-order":"stroke",
+    stroke:"rgba(247,246,242,.92)","stroke-width":"3.5"},g);
+  t.textContent=s.name;
+  const t2=el("text",{x:tx,y:ty+9.5,"text-anchor":anchor,"font-size":"7.5",
+    fill:"#8e8e93","font-weight":"500","paint-order":"stroke",
+    stroke:"rgba(247,246,242,.92)","stroke-width":"3"},g);
+  t2.textContent=s.en;
+  g.addEventListener("click",ev=>{ev.stopPropagation();showSheet(s);});
+}
+
+// ════════ 时刻计算（M1 已通车段，约值） ════════
+// 沿线累计分钟（自 Tallawong）
+const m1Offset={}; ROUTES.m1.forEach(id=>{
+  const s=$id(id), ci=ROUTES.m1.indexOf("cen");
+  m1Offset[id] = ROUTES.m1.indexOf(id)<=ci ? 52-s.t : 52+s.t;
+});
+const M1_END=60; // Tallawong→Sydenham 全程
+const fmt=m=>{m=((m%1440)+1440)%1440;
+  return String(Math.floor(m/60)).padStart(2,"0")+":"+String(m%60).padStart(2,"0");};
+// 基准（工作日约值）：往Sydenham首班 04:30/末班 23:50 自Tallawong发车；
+// 往Tallawong首班 04:25/末班 00:10 自Sydenham发车
+function m1Times(id){
+  const off=m1Offset[id], rev=M1_END-off, res=[];
+  if(id!=="syd") res.push({dir:"Sydenham 方向", sub:"经市区 · 东南行", icon:"↘",
+    first:fmt(270+off), last:fmt(1430+off)});
+  if(id!=="tal") res.push({dir:"Tallawong 方向", sub:"经西北 · 西北行", icon:"↖",
+    first:fmt(265+rev), last:fmt(1450+rev)});
+  return res;
+}
+
+// ════════ 详情卡 ════════
+const sheet=document.getElementById("sheet");
+function badge(text,color,outline){
+  const b=document.createElement("span"); b.className="badge"+(outline?" outline":"");
+  b.style.background=color; if(outline){b.style.color=color;b.style.border="1.5px solid "+color;}
+  b.textContent=text; return b;
+}
+function showSheet(s){
+  const L=LINES[s.line], Z=ZONES[s.zone];
+  document.getElementById("sAccent").style.background=L.color;
+  document.getElementById("sName").textContent=s.name;
+  document.getElementById("sEn").textContent=s.en;
+  const badges=document.getElementById("sBadges"); badges.innerHTML="";
+  badges.appendChild(badge(L.name,L.color));
+  badges.appendChild(badge(Z.name,Z.color,true));
+  badges.appendChild(badge(L.open?"已通车":"未通车 · "+L.year+" 年",L.open?"#2e7d32":"#8e8e93"));
+
+  const tView = s.t===0 ? "位于市中心"
+    : `约 ${s.t} 分钟` + (s.tNote?` <small>（${s.tNote}）</small>`:"");
+  let html=`<div class="cbdCard"><div class="icon">🏙</div><div>
+      <div class="k">乘车至市中心 · CENTRAL / CBD</div>
+      <div class="v">${tView}</div></div></div>`;
+
+  if(s.line==="m1"){
+    html+=`<div class="dirWrap">`+m1Times(s.id).map(d=>`
+      <div class="dirCard">
+        <div class="dirName"><span class="arrow" style="background:${L.color}">${d.icon}</span>
+          往 ${d.dir}<span style="font-weight:500;color:var(--ink3);font-size:10.5px;margin-left:2px">${d.sub}</span></div>
+        <div class="times">
+          <div class="tcol"><div class="tk">🌅 首班车（约）</div><div class="tv">${d.first}</div></div>
+          <div class="tcol"><div class="tk">🌙 末班车（约）</div><div class="tv">${d.last}${d.last<"04"? "<small>次日</small>":""}</div></div>
+        </div>
+      </div>`).join("")+`</div>`;
+  } else {
+    html+=`<div class="naCard">🚧 <b>尚未运营</b> — ${L.note||("预计 "+L.year+" 年通车")}。通车后将公布时刻表。</div>`;
+  }
+  document.getElementById("sBody").innerHTML=html;
+  document.getElementById("sFoot").textContent = L.open
+    ? "首末班为工作日约值，周五/周六末班更晚；实际以 TfNSW / TripView 实时信息为准。"
+    : (s.line==="air"?"至市中心时间为经 St Marys 换乘 T1 的估算。":"至市中心时间为官方预估。");
+  sheet.classList.add("show");
+}
+document.getElementById("closeSheet").onclick=()=>sheet.classList.remove("show");
+svg.addEventListener("click",()=>sheet.classList.remove("show"));
+
+// ════════ 缩放 / 平移 ════════
+const VB={x:0,y:0,w:780,h:1000};
+let vb={...VB};
+const apply=()=>svg.setAttribute("viewBox",`${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+function zoomAt(f,cx,cy){
+  const nw=Math.min(Math.max(vb.w*f,170),1700), nh=nw*(VB.h/VB.w);
+  vb.x=cx-(cx-vb.x)*(nw/vb.w); vb.y=cy-(cy-vb.y)*(nh/vb.h);
+  vb.w=nw; vb.h=nh; apply();
+}
+function pt(cx,cy){ const r=svg.getBoundingClientRect();
+  return {x:vb.x+(cx-r.left)/r.width*vb.w, y:vb.y+(cy-r.top)/r.height*vb.h}; }
+document.getElementById("zin").onclick=()=>zoomAt(0.72,vb.x+vb.w/2,vb.y+vb.h/2);
+document.getElementById("zout").onclick=()=>zoomAt(1.38,vb.x+vb.w/2,vb.y+vb.h/2);
+document.getElementById("zreset").onclick=()=>{vb={...VB};apply();};
+svg.addEventListener("wheel",e=>{e.preventDefault();
+  const p=pt(e.clientX,e.clientY); zoomAt(e.deltaY>0?1.12:0.9,p.x,p.y);},{passive:false});
+
+let drag=null,pinch=null;
+svg.addEventListener("pointerdown",e=>{drag={x:e.clientX,y:e.clientY,vx:vb.x,vy:vb.y};});
+svg.addEventListener("pointermove",e=>{
+  if(!drag||pinch)return;
+  const r=svg.getBoundingClientRect();
+  vb.x=drag.vx-(e.clientX-drag.x)/r.width*vb.w;
+  vb.y=drag.vy-(e.clientY-drag.y)/r.height*vb.h; apply();
+});
+window.addEventListener("pointerup",()=>drag=null);
+svg.addEventListener("touchstart",e=>{
+  if(e.touches.length===2){
+    const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,
+                       e.touches[0].clientY-e.touches[1].clientY);
+    pinch={d,w:vb.w,cx:(e.touches[0].clientX+e.touches[1].clientX)/2,
+           cy:(e.touches[0].clientY+e.touches[1].clientY)/2};
+  }
+},{passive:true});
+svg.addEventListener("touchmove",e=>{
+  if(pinch&&e.touches.length===2){
+    e.preventDefault();
+    const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,
+                       e.touches[0].clientY-e.touches[1].clientY);
+    const c=pt(pinch.cx,pinch.cy);
+    const nw=Math.min(Math.max(pinch.w*(pinch.d/d),170),1700);
+    vb.x=c.x-(c.x-vb.x)*(nw/vb.w); vb.y=c.y-(c.y-vb.y)*(nw*(VB.h/VB.w)/vb.h);
+    vb.w=nw; vb.h=nw*(VB.h/VB.w); apply();
+  }
+},{passive:false});
+svg.addEventListener("touchend",e=>{if(e.touches.length<2)pinch=null;},{passive:true});
+
+document.getElementById("legendBtn").onclick=()=>
+  document.getElementById("legend").classList.toggle("show");
+apply();
+</script>
+</body>
+</html>
