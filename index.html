@@ -273,77 +273,88 @@ const LINES = {
           note:"预计 2032 年通车" },
 };
 
-// zone: 区域  t: 至市中心分钟
+// zone: 所属行政区(LGA)  pc: 邮编  t: 至市中心分钟
 const STATIONS = [
   // ── M1 已通车段 ──
-  {id:"tal", line:"m1", x:150, y:100, name:"塔拉旺", en:"Tallawong", zone:"hills", t:52, lbl:"right", term:true},
-  {id:"rh",  line:"m1", x:188, y:132, name:"劳斯山", en:"Rouse Hill", zone:"hills", t:49, lbl:"right"},
-  {id:"kel", line:"m1", x:222, y:162, name:"凯利维尔", en:"Kellyville", zone:"hills", t:46, lbl:"right"},
-  {id:"bv",  line:"m1", x:256, y:192, name:"贝拉维斯塔", en:"Bella Vista", zone:"hills", t:43, lbl:"right"},
-  {id:"nw",  line:"m1", x:290, y:222, name:"诺韦斯特", en:"Norwest", zone:"hills", t:41, lbl:"right"},
-  {id:"hs",  line:"m1", x:324, y:252, name:"山区展览场", en:"Hills Showground", zone:"hills", t:38, lbl:"right"},
-  {id:"ch",  line:"m1", x:358, y:282, name:"城堡山", en:"Castle Hill", zone:"hills", t:36, lbl:"right"},
-  {id:"cb",  line:"m1", x:396, y:312, name:"樱桃溪", en:"Cherrybrook", zone:"hills", t:33, lbl:"right"},
-  {id:"epp", line:"m1", x:444, y:348, name:"艾平", en:"Epping", zone:"ryde", t:29, lbl:"top", hub:true},
-  {id:"mu",  line:"m1", x:492, y:375, name:"麦考瑞大学", en:"Macquarie University", zone:"ryde", t:25, lbl:"top"},
-  {id:"mp",  line:"m1", x:534, y:396, name:"麦考瑞公园", en:"Macquarie Park", zone:"ryde", t:23, lbl:"top"},
-  {id:"nr",  line:"m1", x:574, y:416, name:"北莱德", en:"North Ryde", zone:"ryde", t:21, lbl:"top"},
-  {id:"cw",  line:"m1", x:652, y:428, name:"车士活", en:"Chatswood", zone:"north", t:16, lbl:"right", hub:true},
-  {id:"cn",  line:"m1", x:664, y:492, name:"克罗斯奈斯特", en:"Crows Nest", zone:"north", t:12, lbl:"right"},
-  {id:"vc",  line:"m1", x:668, y:534, name:"维多利亚十字 · 北悉尼", en:"Victoria Cross", zone:"north", t:10, lbl:"right"},
-  {id:"bar", line:"m1", x:652, y:602, name:"巴兰加鲁", en:"Barangaroo", zone:"cbd", t:7, lbl:"left"},
-  {id:"mpl", line:"m1", x:678, y:640, name:"马丁广场", en:"Martin Place", zone:"cbd", t:2, lbl:"right"},
-  {id:"gad", line:"m1", x:674, y:679, name:"加迪加尔", en:"Gadigal", zone:"cbd", t:1, lbl:"right"},
-  {id:"cen", line:"m1", x:662, y:718, name:"中央站", en:"Central", zone:"cbd", t:0, lbl:"right", hub:true},
-  {id:"wat", line:"m1", x:672, y:762, name:"滑铁卢", en:"Waterloo", zone:"cbd", t:3, lbl:"right"},
-  {id:"syd", line:"m1", x:622, y:822, name:"悉登汉姆", en:"Sydenham", zone:"inner", t:8, lbl:"bottom", hub:true, term:true},
+  {id:"tal", line:"m1", x:150, y:100, name:"塔拉旺", en:"Tallawong", zone:"blacktown", pc:2155, t:52, lbl:"right", term:true},
+  {id:"rh",  line:"m1", x:188, y:132, name:"劳斯山", en:"Rouse Hill", zone:"blacktown", pc:2155, t:49, lbl:"right"},
+  {id:"kel", line:"m1", x:222, y:162, name:"凯利维尔", en:"Kellyville", zone:"hills", pc:2155, t:46, lbl:"right"},
+  {id:"bv",  line:"m1", x:256, y:192, name:"贝拉维斯塔", en:"Bella Vista", zone:"hills", pc:2153, t:43, lbl:"right"},
+  {id:"nw",  line:"m1", x:290, y:222, name:"诺韦斯特", en:"Norwest", zone:"hills", pc:2153, t:41, lbl:"right"},
+  {id:"hs",  line:"m1", x:324, y:252, name:"山区展览场", en:"Hills Showground", zone:"hills", pc:2154, t:38, lbl:"right"},
+  {id:"ch",  line:"m1", x:358, y:282, name:"城堡山", en:"Castle Hill", zone:"hills", pc:2154, t:36, lbl:"right"},
+  {id:"cb",  line:"m1", x:396, y:312, name:"樱桃溪", en:"Cherrybrook", zone:"hills", pc:2126, t:33, lbl:"right"},
+  {id:"epp", line:"m1", x:444, y:348, name:"艾平", en:"Epping", zone:"parramatta", pc:2121, t:29, lbl:"top", hub:true},
+  {id:"mu",  line:"m1", x:492, y:375, name:"麦考瑞大学", en:"Macquarie University", zone:"ryde", pc:2109, t:25, lbl:"top"},
+  {id:"mp",  line:"m1", x:534, y:396, name:"麦考瑞公园", en:"Macquarie Park", zone:"ryde", pc:2113, t:23, lbl:"top"},
+  {id:"nr",  line:"m1", x:574, y:416, name:"北莱德", en:"North Ryde", zone:"ryde", pc:2113, t:21, lbl:"top"},
+  {id:"cw",  line:"m1", x:652, y:428, name:"车士活", en:"Chatswood", zone:"willoughby", pc:2067, t:16, lbl:"right", hub:true},
+  {id:"cn",  line:"m1", x:664, y:492, name:"克罗斯奈斯特", en:"Crows Nest", zone:"northsyd", pc:2065, t:12, lbl:"right"},
+  {id:"vc",  line:"m1", x:668, y:534, name:"维多利亚十字 · 北悉尼", en:"Victoria Cross", zone:"northsyd", pc:2060, t:10, lbl:"right"},
+  {id:"bar", line:"m1", x:652, y:602, name:"巴兰加鲁", en:"Barangaroo", zone:"sydney", pc:2000, t:7, lbl:"left"},
+  {id:"mpl", line:"m1", x:678, y:640, name:"马丁广场", en:"Martin Place", zone:"sydney", pc:2000, t:2, lbl:"right"},
+  {id:"gad", line:"m1", x:674, y:679, name:"加迪加尔", en:"Gadigal", zone:"sydney", pc:2000, t:1, lbl:"right"},
+  {id:"cen", line:"m1", x:662, y:718, name:"中央站", en:"Central", zone:"sydney", pc:2000, t:0, lbl:"right", hub:true},
+  {id:"wat", line:"m1", x:672, y:762, name:"滑铁卢", en:"Waterloo", zone:"sydney", pc:2017, t:3, lbl:"right"},
+  {id:"syd", line:"m1", x:622, y:822, name:"悉登汉姆", en:"Sydenham", zone:"innerwest", pc:2044, t:8, lbl:"bottom", hub:true, term:true},
   // ── M1 西南延伸 2026 ──
-  {id:"mar", line:"m1sw", x:576, y:838, name:"马利围", en:"Marrickville", zone:"inner", t:11, lbl:"bottom"},
-  {id:"dh",  line:"m1sw", x:532, y:850, name:"达利奇山", en:"Dulwich Hill", zone:"inner", t:13, lbl:"top"},
-  {id:"hp",  line:"m1sw", x:488, y:858, name:"赫斯顿公园", en:"Hurlstone Park", zone:"inner", t:15, lbl:"bottom"},
-  {id:"can", line:"m1sw", x:444, y:864, name:"坎特伯雷", en:"Canterbury", zone:"cbank", t:17, lbl:"top"},
-  {id:"cam", line:"m1sw", x:400, y:870, name:"金宝士", en:"Campsie", zone:"cbank", t:19, lbl:"bottom"},
-  {id:"bel", line:"m1sw", x:356, y:876, name:"贝尔莫", en:"Belmore", zone:"cbank", t:21, lbl:"top"},
-  {id:"lak", line:"m1sw", x:312, y:882, name:"莱肯巴", en:"Lakemba", zone:"cbank", t:23, lbl:"bottom"},
-  {id:"wp",  line:"m1sw", x:268, y:888, name:"威利公园", en:"Wiley Park", zone:"cbank", t:25, lbl:"top"},
-  {id:"pb",  line:"m1sw", x:226, y:894, name:"庞奇堡", en:"Punchbowl", zone:"cbank", t:27, lbl:"bottom"},
-  {id:"bank",line:"m1sw", x:178, y:900, name:"宾士镇", en:"Bankstown", zone:"cbank", t:30, lbl:"top", hub:true, term:true},
+  {id:"mar", line:"m1sw", x:576, y:838, name:"马利围", en:"Marrickville", zone:"innerwest", pc:2204, t:11, lbl:"bottom"},
+  {id:"dh",  line:"m1sw", x:532, y:850, name:"达利奇山", en:"Dulwich Hill", zone:"innerwest", pc:2203, t:13, lbl:"top"},
+  {id:"hp",  line:"m1sw", x:488, y:858, name:"赫斯顿公园", en:"Hurlstone Park", zone:"innerwest", pc:2193, t:15, lbl:"bottom"},
+  {id:"can", line:"m1sw", x:444, y:864, name:"坎特伯雷", en:"Canterbury", zone:"cbank", pc:2193, t:17, lbl:"top"},
+  {id:"cam", line:"m1sw", x:400, y:870, name:"金宝士", en:"Campsie", zone:"cbank", pc:2194, t:19, lbl:"bottom"},
+  {id:"bel", line:"m1sw", x:356, y:876, name:"贝尔莫", en:"Belmore", zone:"cbank", pc:2192, t:21, lbl:"top"},
+  {id:"lak", line:"m1sw", x:312, y:882, name:"莱肯巴", en:"Lakemba", zone:"cbank", pc:2195, t:23, lbl:"bottom"},
+  {id:"wp",  line:"m1sw", x:268, y:888, name:"威利公园", en:"Wiley Park", zone:"cbank", pc:2195, t:25, lbl:"top"},
+  {id:"pb",  line:"m1sw", x:226, y:894, name:"庞奇堡", en:"Punchbowl", zone:"cbank", pc:2196, t:27, lbl:"bottom"},
+  {id:"bank",line:"m1sw", x:178, y:900, name:"宾士镇", en:"Bankstown", zone:"cbank", pc:2200, t:30, lbl:"top", hub:true, term:true},
   // ── Metro West 2032 ──
-  {id:"wm",  line:"west", x:150, y:556, name:"西米德", en:"Westmead", zone:"parra", t:24, lbl:"top", hub:true, term:true},
-  {id:"par", line:"west", x:206, y:568, name:"帕拉马塔", en:"Parramatta", zone:"parra", t:20, lbl:"bottom", hub:true},
-  {id:"sop", line:"west", x:292, y:584, name:"悉尼奥林匹克公园", en:"Sydney Olympic Park", zone:"parra", t:16, lbl:"top"},
-  {id:"ns",  line:"west", x:364, y:600, name:"北斯特拉斯菲尔德", en:"North Strathfield", zone:"inner", t:14, lbl:"bottom"},
-  {id:"bn",  line:"west", x:428, y:612, name:"北宝活", en:"Burwood North", zone:"inner", t:12, lbl:"top"},
-  {id:"fd",  line:"west", x:490, y:620, name:"五码头", en:"Five Dock", zone:"inner", t:9, lbl:"bottom"},
-  {id:"tb",  line:"west", x:560, y:624, name:"海湾区", en:"The Bays", zone:"cbd", t:5, lbl:"bottom"},
-  {id:"pyr", line:"west", x:612, y:618, name:"派蒙", en:"Pyrmont", zone:"cbd", t:3, lbl:"bottom"},
-  {id:"hun", line:"west", x:664, y:610, name:"亨特街", en:"Hunter St", zone:"cbd", t:0, lbl:"top", hub:true, term:true},
+  {id:"wm",  line:"west", x:150, y:556, name:"西米德", en:"Westmead", zone:"parramatta", pc:2145, t:24, lbl:"top", hub:true, term:true},
+  {id:"par", line:"west", x:206, y:568, name:"帕拉马塔", en:"Parramatta", zone:"parramatta", pc:2150, t:20, lbl:"bottom", hub:true},
+  {id:"sop", line:"west", x:292, y:584, name:"悉尼奥林匹克公园", en:"Sydney Olympic Park", zone:"parramatta", pc:2127, t:16, lbl:"top"},
+  {id:"ns",  line:"west", x:364, y:600, name:"北斯特拉斯菲尔德", en:"North Strathfield", zone:"canadabay", pc:2137, t:14, lbl:"bottom"},
+  {id:"bn",  line:"west", x:428, y:612, name:"北宝活", en:"Burwood North", zone:"burwood", pc:2134, t:12, lbl:"top"},
+  {id:"fd",  line:"west", x:490, y:620, name:"五码头", en:"Five Dock", zone:"canadabay", pc:2046, t:9, lbl:"bottom"},
+  {id:"tb",  line:"west", x:560, y:624, name:"海湾区", en:"The Bays", zone:"sydney", pc:2039, t:5, lbl:"bottom"},
+  {id:"pyr", line:"west", x:612, y:618, name:"派蒙", en:"Pyrmont", zone:"sydney", pc:2009, t:3, lbl:"bottom"},
+  {id:"hun", line:"west", x:664, y:610, name:"亨特街", en:"Hunter St", zone:"sydney", pc:2000, t:0, lbl:"top", hub:true, term:true},
   // ── 机场线 2027 ──
-  {id:"stm", line:"air", x:66, y:400, name:"圣玛丽", en:"St Marys", zone:"wsyd", t:52, tNote:"经 T1 换乘", lbl:"right", hub:true, term:true},
-  {id:"oh",  line:"air", x:72, y:478, name:"果园山", en:"Orchard Hills", zone:"wsyd", t:57, tNote:"经 T1 换乘", lbl:"right"},
-  {id:"lud", line:"air", x:78, y:556, name:"卢登纳姆", en:"Luddenham", zone:"wsyd", t:61, tNote:"经 T1 换乘", lbl:"right"},
-  {id:"abp", line:"air", x:84, y:634, name:"机场商务园", en:"Airport Business Park", zone:"wsyd", t:65, tNote:"经 T1 换乘", lbl:"right"},
-  {id:"att", line:"air", x:92, y:712, name:"机场航站楼", en:"Airport Terminal", zone:"wsyd", t:67, tNote:"经 T1 换乘", lbl:"right", hub:true},
-  {id:"bra", line:"air", x:104, y:790, name:"布拉德菲尔德", en:"Bradfield", zone:"wsyd", t:70, tNote:"经 T1 换乘", lbl:"right", term:true},
+  {id:"stm", line:"air", x:66, y:400, name:"圣玛丽", en:"St Marys", zone:"penrith", pc:2760, t:52, tNote:"经 T1 换乘", lbl:"right", hub:true, term:true},
+  {id:"oh",  line:"air", x:72, y:478, name:"果园山", en:"Orchard Hills", zone:"penrith", pc:2748, t:57, tNote:"经 T1 换乘", lbl:"right"},
+  {id:"lud", line:"air", x:78, y:556, name:"卢登纳姆", en:"Luddenham", zone:"penrith", pc:2745, t:61, tNote:"经 T1 换乘", lbl:"right"},
+  {id:"abp", line:"air", x:84, y:634, name:"机场商务园", en:"Airport Business Park", zone:"liverpool", pc:2555, t:65, tNote:"经 T1 换乘", lbl:"right"},
+  {id:"att", line:"air", x:92, y:712, name:"机场航站楼", en:"Airport Terminal", zone:"liverpool", pc:2555, t:67, tNote:"经 T1 换乘", lbl:"right", hub:true},
+  {id:"bra", line:"air", x:104, y:790, name:"布拉德菲尔德", en:"Bradfield", zone:"liverpool", pc:2556, t:70, tNote:"经 T1 换乘", lbl:"right", term:true},
 ];
 
+// 按行政区(LGA)划分
 const ZONES = {
+  blacktown: { name:"Blacktown 布莱克敦", color:"#b07d2b",
+    pts:[[110,60],[242,62],[252,150],[130,186]], lx:116, ly:84 },
   hills: { name:"The Hills 山区", color:"#3a7d44",
-    pts:[[100,60],[440,60],[470,330],[340,360],[90,300]], lx:118, ly:90 },
-  ryde:  { name:"Ryde 莱德区", color:"#c99514",
-    pts:[[410,332],[620,332],[620,450],[410,440]], lx:420, ly:452 },
-  north: { name:"North Shore 北岸", color:"#2563ab",
-    pts:[[624,336],[760,360],[760,568],[630,562]], lx:648, ly:354 },
-  cbd:   { name:"CBD & Inner City 市中心", color:"#b93838",
-    pts:[[540,574],[760,576],[760,790],[610,790],[540,700]], lx:618, ly:776 },
-  inner: { name:"Inner West 内西区", color:"#7a4bab",
-    pts:[[330,578],[534,578],[534,696],[640,780],[640,872],[440,846],[330,690]], lx:342, ly:664 },
+    pts:[[182,148],[284,148],[462,318],[462,352],[356,368],[150,242]], lx:158, ly:268 },
+  parramatta: { name:"Parramatta 帕拉马塔", color:"#0d7a8a",
+    pts:[[120,505],[330,516],[352,470],[402,394],[420,330],[472,316],[480,360],[432,452],[352,558],[332,640],[120,618]], lx:128, ly:532 },
+  ryde: { name:"Ryde 莱德", color:"#c99514",
+    pts:[[470,332],[624,332],[624,454],[470,442]], lx:480, ly:454 },
+  willoughby: { name:"Willoughby 韦洛比", color:"#2563ab",
+    pts:[[628,390],[740,398],[738,462],[628,462]], lx:684, ly:408 },
+  northsyd: { name:"North Sydney 北悉尼", color:"#5a4fcf",
+    pts:[[632,468],[742,470],[744,566],[634,560]], lx:692, ly:484 },
+  sydney: { name:"City of Sydney 悉尼市", color:"#b93838",
+    pts:[[536,590],[624,584],[640,572],[760,574],[760,792],[612,792],[560,700],[536,650]], lx:700, ly:778 },
+  innerwest: { name:"Inner West 内西区", color:"#7a4bab",
+    pts:[[452,832],[660,782],[660,878],[452,886]], lx:520, ly:892 },
+  canadabay: { name:"Canada Bay 加拿大湾", color:"#3f8f6b",
+    pts:[[336,580],[520,596],[520,654],[336,638]], lx:338, ly:664 },
+  burwood: { name:"Burwood 宝活", color:"#d4703a",
+    pts:[[400,586],[458,592],[462,646],[398,642]], lx:398, ly:580 },
   cbank: { name:"Canterbury-Bankstown 坎特伯雷-宾士镇", color:"#b0447c",
-    pts:[[130,846],[470,846],[470,942],[130,942]], lx:142, ly:936 },
-  parra: { name:"Parramatta 帕拉马塔区", color:"#0d7a8a",
-    pts:[[120,510],[326,522],[326,636],[120,616]], lx:130, ly:534 },
-  wsyd:  { name:"Western Sydney 西悉尼", color:"#c25a17",
-    pts:[[20,360],[116,360],[150,830],[36,830]], lx:30, ly:384 },
+    pts:[[130,840],[460,846],[460,942],[130,942]], lx:142, ly:936 },
+  penrith: { name:"Penrith 彭里斯", color:"#c25a17",
+    pts:[[24,360],[114,360],[124,600],[36,600]], lx:30, ly:384 },
+  liverpool: { name:"Liverpool 利物浦", color:"#8a6642",
+    pts:[[36,606],[128,606],[152,828],[46,828]], lx:46, ly:624 },
 };
 
 // ════════ 工具 ════════
@@ -550,20 +561,6 @@ const LGAS = {
     eth:"澳洲裔 15.6% · 英格兰裔 12.2% · 印度裔 6.0% · 黎巴嫩裔 5.9%",
     lang:"阿拉伯语 13.1% · 越南语 5.3% · 印地语 3.4%" },
 };
-const STN_LGA = {
-  tal:"blacktown", rh:"blacktown",
-  kel:"hills", bv:"hills", nw:"hills", hs:"hills", ch:"hills", cb:"hills",
-  epp:"parramatta", mu:"ryde", mp:"ryde", nr:"ryde",
-  cw:"willoughby", cn:"northsyd", vc:"northsyd",
-  bar:"sydney", mpl:"sydney", gad:"sydney", cen:"sydney", wat:"sydney",
-  syd:"innerwest", mar:"innerwest", dh:"innerwest", hp:"innerwest",
-  can:"cbank", cam:"cbank", bel:"cbank", lak:"cbank", wp:"cbank", pb:"cbank", bank:"cbank",
-  wm:"parramatta", par:"parramatta", sop:"parramatta",
-  ns:"canadabay", fd:"canadabay", bn:"burwood",
-  tb:"sydney", pyr:"sydney", hun:"sydney",
-  stm:"penrith", oh:"penrith", lud:"penrith",
-  abp:"liverpool", att:"liverpool", bra:"liverpool",
-};
 function safetyOf(v){
   if(v===null) return {label:"见备注", color:"#e07b1f"};
   if(v<500)  return {label:"治安 优", color:"#2e7d32"};
@@ -572,8 +569,8 @@ function safetyOf(v){
   if(v<1400) return {label:"治安 中偏高", color:"#e07b1f"};
   return {label:"犯罪率偏高", color:"#d0342c"};
 }
-function lgaCardHtml(sid){
-  const L=LGAS[STN_LGA[sid]]; if(!L) return "";
+function lgaCardHtml(s){
+  const L=LGAS[s.zone]; if(!L) return "";
   const sf=safetyOf(L.v);
   const vsAvg = L.v===null ? "" :
     (L.v<NSW_AVG.v ? `较全州平均低 ${Math.round((1-L.v/NSW_AVG.v)*100)}%`
@@ -583,7 +580,7 @@ function lgaCardHtml(sid){
     : `<span class="safeBadge" style="background:${sf.color}">${sf.label}</span>
        暴力案件率 ${L.v}/10万 <small>· ${vsAvg} · 财产类 ${L.p}/10万</small>`;
   return `<div class="lgaCard">
-    <div class="lh">📊 区域画像 · ${L.name}</div>
+    <div class="lh">📊 区域画像 · ${L.name} · 邮编 ${s.pc}</div>
     <div class="lgaRow"><span class="ic">🛡</span><span class="k">治安水平</span>
       <span class="v">${crimeV}</span></div>
     <div class="lgaRow"><span class="ic">💰</span><span class="k">收入水平</span>
@@ -742,7 +739,7 @@ function showSheet(s, asOrigin){
   const L=LINES[s.line], Z=ZONES[s.zone];
   document.getElementById("sAccent").style.background=L.color;
   document.getElementById("sName").textContent=s.name;
-  document.getElementById("sEn").textContent=s.en;
+  document.getElementById("sEn").textContent=`${s.en} · ${ZONES[s.zone].name} · NSW ${s.pc}`;
   const badges=document.getElementById("sBadges"); badges.innerHTML="";
   badges.appendChild(badge(L.name,L.color));
   badges.appendChild(badge(Z.name,Z.color,true));
@@ -753,7 +750,7 @@ function showSheet(s, asOrigin){
   let html=`<div class="cbdCard"><div class="icon">🏙</div><div>
       <div class="k">乘车至市中心 · CENTRAL / CBD</div>
       <div class="v">${tView}</div></div></div>`;
-  html+=lgaCardHtml(s.id);
+  html+=lgaCardHtml(s);
 
   if(s.line==="m1"){
     html+=`<div class="dirWrap">`+m1Times(s.id).map(d=>`
@@ -777,10 +774,10 @@ function showSheet(s, asOrigin){
   sheet.classList.add("show");
 }
 document.getElementById("closeSheet").onclick=()=>sheet.classList.remove("show");
-// 点按地图空白/变暗区域：路线显示中 → 清除路线；否则仅收起卡片
+// 点按地图空白/变暗区域：路线显示中 → 清除路线；已选起点 → 取消选中；同时收起卡片
 svg.addEventListener("click",()=>{
   if(dragMoved) return;            // 拖动平移后松手不算点按
-  if(activeRoute) clearPlan();
+  if(activeRoute || origin) clearPlan();
   sheet.classList.remove("show");
 });
 
