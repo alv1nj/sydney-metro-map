@@ -141,6 +141,20 @@
     font-weight:500; line-height:1.55; }
   .naCard b { color:var(--ink); }
 
+  /* ── 区域画像 ── */
+  .lgaCard { border-radius:14px; padding:11px 14px 8px; background:rgba(0,0,0,.035);
+    border:1px solid rgba(0,0,0,.06); margin-bottom:10px; }
+  .lgaCard .lh { font-size:11px; font-weight:800; color:var(--ink2);
+    letter-spacing:.4px; margin-bottom:6px; }
+  .lgaRow { display:flex; gap:8px; padding:5.5px 0; font-size:12px; align-items:baseline; }
+  .lgaRow + .lgaRow { border-top:1px dashed rgba(0,0,0,.07); }
+  .lgaRow .ic { flex:none; width:18px; text-align:center; }
+  .lgaRow .k { flex:none; width:78px; color:var(--ink2); font-weight:600; font-size:11px; }
+  .lgaRow .v { flex:1; font-weight:600; line-height:1.5; }
+  .lgaRow .v small { color:var(--ink2); font-weight:500; }
+  .safeBadge { font-size:10.5px; font-weight:800; color:#fff; border-radius:8px;
+    padding:1.5px 8px; margin-right:6px; white-space:nowrap; }
+
   #sheet .foot { font-size:10px; color:var(--ink3); margin-top:11px; line-height:1.5; }
   #closeSheet { position:absolute; right:14px; top:14px; border:none;
     background:rgba(0,0,0,.06); width:29px; height:29px; border-radius:50%;
@@ -491,6 +505,98 @@ function m1Times(id){
   return res;
 }
 
+// ════════ 区域画像数据 ════════
+// 犯罪率: BOCSAR 2025.4–2026.3（每10万人案件率）; 人口数据: ABS 2021人口普查
+const NSW_AVG = { v:1166, p:1606 };
+const LGAS = {
+  hills:    { name:"The Hills Shire 山区行政区", v:414, p:662, income:2831, edu:40.5,
+    eth:"英格兰裔 22.6% · 澳洲裔 22.0% · 华裔 14.7% · 印度裔 9.1%",
+    lang:"普通话 8.2% · 粤语 3.4% · 印地语 2.8%" },
+  blacktown:{ name:"Blacktown 布莱克敦", v:1295, p:1402, income:2107, edu:29.2,
+    eth:"澳洲裔 19.1% · 英格兰裔 16.8% · 印度裔 13.5% · 菲律宾裔 9.0%",
+    lang:"旁遮普语 5.2% · 印地语 4.4% · 他加禄语 3.8%" },
+  ryde:     { name:"City of Ryde 莱德市", v:565, p:1223, income:2098, edu:46.4,
+    eth:"华裔 26.1% · 英格兰裔 16.9% · 澳洲裔 16.1%",
+    lang:"普通话 13.8% · 粤语 7.2% · 韩语 4.5%" },
+  willoughby:{ name:"Willoughby 韦洛比", v:571, p:1482, income:2556, edu:53.1,
+    eth:"华裔 26.5% · 英格兰裔 23.5% · 澳洲裔 20.0%",
+    lang:"普通话 12.9% · 粤语 7.8% · 日语 2.4%" },
+  northsyd: { name:"North Sydney 北悉尼", v:454, p:1040, income:2524, edu:59.5,
+    eth:"英格兰裔 33.6% · 澳洲裔 22.9% · 爱尔兰裔 12.9% · 华裔 10.8%",
+    lang:"普通话 4.3% · 粤语 2.7% · 西班牙语 1.6%" },
+  sydney:   { name:"City of Sydney 悉尼市", v:null, p:null, income:2212, edu:52.6,
+    vNote:"案件总量居全州前列，但通勤/游客人口庞大，BOCSAR 不计算比率；CBD 及夜间娱乐区需保持留意",
+    eth:"英格兰裔 25.1% · 澳洲裔 16.8% · 华裔 16.8%",
+    lang:"普通话 8.6% · 粤语 2.8% · 泰语 2.8%" },
+  innerwest:{ name:"Inner West 内西区议会", v:870, p:1608, income:2340, edu:48.2,
+    eth:"英格兰裔 29.9% · 澳洲裔 24.4% · 爱尔兰裔 13.7% · 华裔 8.5%",
+    lang:"普通话 3.3% · 希腊语 2.7% · 意大利语 2.2%" },
+  cbank:    { name:"Canterbury-Bankstown 坎特伯雷-宾士镇", v:913, p:1046, income:1556, edu:23.6,
+    eth:"黎巴嫩裔 14.1% · 澳洲裔 13.9% · 华裔 11.6% · 越南裔 7.3%",
+    lang:"阿拉伯语 17.2% · 越南语 7.5% · 普通话 5.1%" },
+  parramatta:{ name:"City of Parramatta 帕拉马塔市", v:934, p:1953, income:2051, edu:44.2,
+    eth:"华裔 22.3% · 英格兰裔 14.4% · 澳洲裔 13.9% · 印度裔 11.2%",
+    lang:"普通话 12.4% · 粤语 6.4% · 韩语 5.5%" },
+  canadabay:{ name:"City of Canada Bay 加拿大湾市", v:569, p:1224, income:2371, edu:42.9,
+    eth:"英格兰裔 19.0% · 澳洲裔 17.6% · 华裔 16.2% · 意大利裔 15.2%",
+    lang:"普通话 8.6% · 意大利语 6.0% · 粤语 3.9%" },
+  burwood:  { name:"Burwood 宝活", v:953, p:2111, income:1867, edu:37.8,
+    eth:"华裔 32.8% · 英格兰裔 10.7% · 尼泊尔裔 7.4% · 意大利裔 7.3%",
+    lang:"普通话 19.9% · 粤语 8.2% · 尼泊尔语 7.3%" },
+  penrith:  { name:"Penrith 彭里斯", v:1417, p:1921, income:1903, edu:17.3,
+    eth:"澳洲裔 33.3% · 英格兰裔 30.2% · 原住民 4.6%",
+    lang:"阿拉伯语 1.8% · 旁遮普语 1.4% · 他加禄语 1.2%" },
+  liverpool:{ name:"Liverpool 利物浦", v:1131, p:1434, income:1819, edu:20.1,
+    eth:"澳洲裔 15.6% · 英格兰裔 12.2% · 印度裔 6.0% · 黎巴嫩裔 5.9%",
+    lang:"阿拉伯语 13.1% · 越南语 5.3% · 印地语 3.4%" },
+};
+const STN_LGA = {
+  tal:"blacktown", rh:"blacktown",
+  kel:"hills", bv:"hills", nw:"hills", hs:"hills", ch:"hills", cb:"hills",
+  epp:"parramatta", mu:"ryde", mp:"ryde", nr:"ryde",
+  cw:"willoughby", cn:"northsyd", vc:"northsyd",
+  bar:"sydney", mpl:"sydney", gad:"sydney", cen:"sydney", wat:"sydney",
+  syd:"innerwest", mar:"innerwest", dh:"innerwest", hp:"innerwest",
+  can:"cbank", cam:"cbank", bel:"cbank", lak:"cbank", wp:"cbank", pb:"cbank", bank:"cbank",
+  wm:"parramatta", par:"parramatta", sop:"parramatta",
+  ns:"canadabay", fd:"canadabay", bn:"burwood",
+  tb:"sydney", pyr:"sydney", hun:"sydney",
+  stm:"penrith", oh:"penrith", lud:"penrith",
+  abp:"liverpool", att:"liverpool", bra:"liverpool",
+};
+function safetyOf(v){
+  if(v===null) return {label:"见备注", color:"#e07b1f"};
+  if(v<500)  return {label:"治安 优", color:"#2e7d32"};
+  if(v<750)  return {label:"治安 良", color:"#5aa832"};
+  if(v<1050) return {label:"治安 中等", color:"#d9a400"};
+  if(v<1400) return {label:"治安 中偏高", color:"#e07b1f"};
+  return {label:"犯罪率偏高", color:"#d0342c"};
+}
+function lgaCardHtml(sid){
+  const L=LGAS[STN_LGA[sid]]; if(!L) return "";
+  const sf=safetyOf(L.v);
+  const vsAvg = L.v===null ? "" :
+    (L.v<NSW_AVG.v ? `较全州平均低 ${Math.round((1-L.v/NSW_AVG.v)*100)}%`
+                   : `较全州平均高 ${Math.round((L.v/NSW_AVG.v-1)*100)}%`);
+  const crimeV = L.v===null
+    ? `<small>${L.vNote}</small>`
+    : `<span class="safeBadge" style="background:${sf.color}">${sf.label}</span>
+       暴力案件率 ${L.v}/10万 <small>· ${vsAvg} · 财产类 ${L.p}/10万</small>`;
+  return `<div class="lgaCard">
+    <div class="lh">📊 区域画像 · ${L.name}</div>
+    <div class="lgaRow"><span class="ic">🛡</span><span class="k">治安水平</span>
+      <span class="v">${crimeV}</span></div>
+    <div class="lgaRow"><span class="ic">💰</span><span class="k">收入水平</span>
+      <span class="v">家庭周收入中位数 $${L.income.toLocaleString()} <small>· 全澳中位 $1,746</small></span></div>
+    <div class="lgaRow"><span class="ic">🎓</span><span class="k">教育程度</span>
+      <span class="v">本科及以上 ${L.edu}% <small>· 全澳 26.3%</small></span></div>
+    <div class="lgaRow"><span class="ic">🌏</span><span class="k">族裔构成</span>
+      <span class="v">${L.eth}</span></div>
+    <div class="lgaRow"><span class="ic">🗣</span><span class="k">常用外语</span>
+      <span class="v">${L.lang}</span></div>
+  </div>`;
+}
+
 // ════════ 行程规划 ════════
 // 建图：相邻站权重 = 至市中心时间差（分钟），另加换乘接驳边
 const ADJ={};
@@ -647,6 +753,7 @@ function showSheet(s, asOrigin){
   let html=`<div class="cbdCard"><div class="icon">🏙</div><div>
       <div class="k">乘车至市中心 · CENTRAL / CBD</div>
       <div class="v">${tView}</div></div></div>`;
+  html+=lgaCardHtml(s.id);
 
   if(s.line==="m1"){
     html+=`<div class="dirWrap">`+m1Times(s.id).map(d=>`
@@ -663,9 +770,10 @@ function showSheet(s, asOrigin){
   }
   if(asOrigin) html+=`<div class="hintBar">🧭 已设为<b>出发站</b> — 再点击地图上任意站点即可规划路线并计算时间（再点本站取消）</div>`;
   document.getElementById("sBody").innerHTML=html;
-  document.getElementById("sFoot").textContent = L.open
+  const SRC="区域数据：BOCSAR 犯罪统计 2025.4–2026.3（按行政区）· ABS 2021 人口普查。";
+  document.getElementById("sFoot").textContent = (L.open
     ? "首末班为工作日约值，周五/周六末班更晚；实际以 TfNSW / TripView 实时信息为准。"
-    : (s.line==="air"?"至市中心时间为经 St Marys 换乘 T1 的估算。":"至市中心时间为官方预估。");
+    : (s.line==="air"?"至市中心时间为经 St Marys 换乘 T1 的估算。":"至市中心时间为官方预估。"))+" "+SRC;
   sheet.classList.add("show");
 }
 document.getElementById("closeSheet").onclick=()=>sheet.classList.remove("show");
