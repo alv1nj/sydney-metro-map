@@ -220,6 +220,14 @@
   #clearRoute { width:100%; margin-top:12px; border:none; border-radius:13px;
     padding:12px; font-size:14px; font-weight:700; color:#c0392b;
     background:rgba(255,59,48,.1); }
+  /* ── 票价卡 ── */
+  .fareCard { background:rgba(29,79,168,.07); border:1px solid rgba(29,79,168,.16);
+    border-radius:14px; padding:10px 14px; margin:10px 0 12px; font-size:13.5px; }
+  .fareCard .fv { margin-right:10px; opacity:.5; font-weight:600; }
+  .fareCard .fv.on { opacity:1; color:#1d4fa8; font-weight:800; }
+  .fareCard .cur { font-size:10px; color:#8e8e93; font-weight:600; }
+  .fareCard .fnote { font-size:10px; color:#8e8e93; font-weight:500;
+    line-height:1.55; margin-top:5px; }
 </style>
 </head>
 <body>
@@ -291,55 +299,55 @@ const LINES = {
 // zone: 所属行政区(LGA)  pc: 邮编  t: 至市中心分钟
 const STATIONS = [
   // ── M1 已通车段 ──
-  {id:"tal", line:"m1", x:150, y:100, name:"塔拉旺", en:"Tallawong", zone:"blacktown", pc:2155, t:52, lbl:"right", term:true},
-  {id:"rh",  line:"m1", x:188, y:132, name:"劳斯山", en:"Rouse Hill", zone:"blacktown", pc:2155, t:49, lbl:"right"},
-  {id:"kel", line:"m1", x:222, y:162, name:"凯利维尔", en:"Kellyville", zone:"hills", pc:2155, t:46, lbl:"right"},
-  {id:"bv",  line:"m1", x:256, y:192, name:"贝拉维斯塔", en:"Bella Vista", zone:"hills", pc:2153, t:43, lbl:"right"},
-  {id:"nw",  line:"m1", x:290, y:222, name:"诺韦斯特", en:"Norwest", zone:"hills", pc:2153, t:41, lbl:"right"},
-  {id:"hs",  line:"m1", x:324, y:252, name:"山区展览场", en:"Hills Showground", zone:"hills", pc:2154, t:38, lbl:"right"},
-  {id:"ch",  line:"m1", x:358, y:282, name:"城堡山", en:"Castle Hill", zone:"hills", pc:2154, t:36, lbl:"right"},
-  {id:"cb",  line:"m1", x:396, y:312, name:"樱桃溪", en:"Cherrybrook", zone:"hills", pc:2126, t:33, lbl:"right"},
-  {id:"epp", line:"m1", x:444, y:348, name:"艾平", en:"Epping", zone:"parramatta", pc:2121, t:29, lbl:"top", hub:true},
-  {id:"mu",  line:"m1", x:492, y:375, name:"麦考瑞大学", en:"Macquarie University", zone:"ryde", pc:2109, t:25, lbl:"top"},
-  {id:"mp",  line:"m1", x:534, y:396, name:"麦考瑞公园", en:"Macquarie Park", zone:"ryde", pc:2113, t:23, lbl:"top"},
-  {id:"nr",  line:"m1", x:574, y:416, name:"北莱德", en:"North Ryde", zone:"ryde", pc:2113, t:21, lbl:"top"},
-  {id:"cw",  line:"m1", x:652, y:428, name:"车士活", en:"Chatswood", zone:"willoughby", pc:2067, t:16, lbl:"right", hub:true},
-  {id:"cn",  line:"m1", x:664, y:492, name:"克罗斯奈斯特", en:"Crows Nest", zone:"northsyd", pc:2065, t:12, lbl:"right"},
-  {id:"vc",  line:"m1", x:668, y:534, name:"维多利亚十字 · 北悉尼", en:"Victoria Cross", zone:"northsyd", pc:2060, t:10, lbl:"right"},
-  {id:"bar", line:"m1", x:652, y:602, name:"巴兰加鲁", en:"Barangaroo", zone:"sydney", pc:2000, t:7, lbl:"left"},
-  {id:"mpl", line:"m1", x:678, y:640, name:"马丁广场", en:"Martin Place", zone:"sydney", pc:2000, t:2, lbl:"right"},
-  {id:"gad", line:"m1", x:674, y:679, name:"加迪加尔", en:"Gadigal", zone:"sydney", pc:2000, t:1, lbl:"right"},
-  {id:"cen", line:"m1", x:662, y:718, name:"中央站", en:"Central", zone:"sydney", pc:2000, t:0, lbl:"right", hub:true},
-  {id:"wat", line:"m1", x:672, y:762, name:"滑铁卢", en:"Waterloo", zone:"sydney", pc:2017, t:3, lbl:"right"},
-  {id:"syd", line:"m1", x:622, y:822, name:"悉登汉姆", en:"Sydenham", zone:"innerwest", pc:2044, t:8, lbl:"bottom", hub:true, term:true},
+  {id:"tal", line:"m1", x:96, y:88, name:"塔拉旺", en:"Tallawong", zone:"blacktown", pc:2155, t:52, lbl:"right", term:true},
+  {id:"rh",  line:"m1", x:130, y:122, name:"劳斯山", en:"Rouse Hill", zone:"blacktown", pc:2155, t:49, lbl:"right"},
+  {id:"kel", line:"m1", x:164, y:156, name:"凯利维尔", en:"Kellyville", zone:"hills", pc:2155, t:46, lbl:"right"},
+  {id:"bv",  line:"m1", x:198, y:190, name:"贝拉维斯塔", en:"Bella Vista", zone:"hills", pc:2153, t:43, lbl:"right"},
+  {id:"nw",  line:"m1", x:232, y:224, name:"诺韦斯特", en:"Norwest", zone:"hills", pc:2153, t:41, lbl:"right"},
+  {id:"hs",  line:"m1", x:266, y:258, name:"山区展览场", en:"Hills Showground", zone:"hills", pc:2154, t:38, lbl:"right"},
+  {id:"ch",  line:"m1", x:300, y:292, name:"城堡山", en:"Castle Hill", zone:"hills", pc:2154, t:36, lbl:"right"},
+  {id:"cb",  line:"m1", x:334, y:326, name:"樱桃溪", en:"Cherrybrook", zone:"hills", pc:2126, t:33, lbl:"right"},
+  {id:"epp", line:"m1", x:368, y:360, name:"艾平", en:"Epping", zone:"parramatta", pc:2121, t:29, lbl:"bottom", hub:true},
+  {id:"mu",  line:"m1", x:432, y:360, name:"麦考瑞大学", en:"Macquarie University", zone:"ryde", pc:2109, t:25, lbl:"top"},
+  {id:"mp",  line:"m1", x:496, y:360, name:"麦考瑞公园", en:"Macquarie Park", zone:"ryde", pc:2113, t:23, lbl:"bottom"},
+  {id:"nr",  line:"m1", x:560, y:360, name:"北莱德", en:"North Ryde", zone:"ryde", pc:2113, t:21, lbl:"top"},
+  {id:"cw",  line:"m1", x:624, y:360, name:"车士活", en:"Chatswood", zone:"willoughby", pc:2067, t:16, lbl:"right", hub:true},
+  {id:"cn",  line:"m1", x:624, y:424, name:"克罗斯奈斯特", en:"Crows Nest", zone:"northsyd", pc:2065, t:12, lbl:"right"},
+  {id:"vc",  line:"m1", x:624, y:478, name:"维多利亚十字 · 北悉尼", en:"Victoria Cross", zone:"northsyd", pc:2060, t:10, lbl:"right"},
+  {id:"bar", line:"m1", x:624, y:532, name:"巴兰加鲁", en:"Barangaroo", zone:"sydney", pc:2000, t:7, lbl:"right"},
+  {id:"mpl", line:"m1", x:624, y:586, name:"马丁广场", en:"Martin Place", zone:"sydney", pc:2000, t:2, lbl:"right"},
+  {id:"gad", line:"m1", x:624, y:634, name:"加迪加尔", en:"Gadigal", zone:"sydney", pc:2000, t:1, lbl:"right"},
+  {id:"cen", line:"m1", x:624, y:682, name:"中央站", en:"Central", zone:"sydney", pc:2000, t:0, lbl:"right", hub:true},
+  {id:"wat", line:"m1", x:624, y:730, name:"滑铁卢", en:"Waterloo", zone:"sydney", pc:2017, t:3, lbl:"right"},
+  {id:"syd", line:"m1", x:576, y:778, name:"悉登汉姆", en:"Sydenham", zone:"innerwest", pc:2044, t:8, lbl:"right", hub:true, term:true},
   // ── M1 西南延伸 2026 ──
-  {id:"mar", line:"m1sw", x:576, y:838, name:"马利围", en:"Marrickville", zone:"innerwest", pc:2204, t:11, lbl:"bottom"},
-  {id:"dh",  line:"m1sw", x:532, y:850, name:"达利奇山", en:"Dulwich Hill", zone:"innerwest", pc:2203, t:13, lbl:"top"},
-  {id:"hp",  line:"m1sw", x:488, y:858, name:"赫斯顿公园", en:"Hurlstone Park", zone:"innerwest", pc:2193, t:15, lbl:"bottom"},
-  {id:"can", line:"m1sw", x:444, y:864, name:"坎特伯雷", en:"Canterbury", zone:"cbank", pc:2193, t:17, lbl:"top"},
-  {id:"cam", line:"m1sw", x:400, y:870, name:"金宝士", en:"Campsie", zone:"cbank", pc:2194, t:19, lbl:"bottom"},
-  {id:"bel", line:"m1sw", x:356, y:876, name:"贝尔莫", en:"Belmore", zone:"cbank", pc:2192, t:21, lbl:"top"},
-  {id:"lak", line:"m1sw", x:312, y:882, name:"莱肯巴", en:"Lakemba", zone:"cbank", pc:2195, t:23, lbl:"bottom"},
-  {id:"wp",  line:"m1sw", x:268, y:888, name:"威利公园", en:"Wiley Park", zone:"cbank", pc:2195, t:25, lbl:"top"},
-  {id:"pb",  line:"m1sw", x:226, y:894, name:"庞奇堡", en:"Punchbowl", zone:"cbank", pc:2196, t:27, lbl:"bottom"},
-  {id:"bank",line:"m1sw", x:178, y:900, name:"宾士镇", en:"Bankstown", zone:"cbank", pc:2200, t:30, lbl:"top", hub:true, term:true},
+  {id:"mar", line:"m1sw", x:506, y:810, name:"马利围", en:"Marrickville", zone:"innerwest", pc:2204, t:11, lbl:"bottom"},
+  {id:"dh",  line:"m1sw", x:462, y:810, name:"达利奇山", en:"Dulwich Hill", zone:"innerwest", pc:2203, t:13, lbl:"top"},
+  {id:"hp",  line:"m1sw", x:418, y:810, name:"赫斯顿公园", en:"Hurlstone Park", zone:"innerwest", pc:2193, t:15, lbl:"bottom"},
+  {id:"can", line:"m1sw", x:374, y:810, name:"坎特伯雷", en:"Canterbury", zone:"cbank", pc:2193, t:17, lbl:"top"},
+  {id:"cam", line:"m1sw", x:330, y:810, name:"金宝士", en:"Campsie", zone:"cbank", pc:2194, t:19, lbl:"bottom"},
+  {id:"bel", line:"m1sw", x:286, y:810, name:"贝尔莫", en:"Belmore", zone:"cbank", pc:2192, t:21, lbl:"top"},
+  {id:"lak", line:"m1sw", x:242, y:810, name:"莱肯巴", en:"Lakemba", zone:"cbank", pc:2195, t:23, lbl:"bottom"},
+  {id:"wp",  line:"m1sw", x:198, y:810, name:"威利公园", en:"Wiley Park", zone:"cbank", pc:2195, t:25, lbl:"top"},
+  {id:"pb",  line:"m1sw", x:154, y:810, name:"庞奇堡", en:"Punchbowl", zone:"cbank", pc:2196, t:27, lbl:"bottom"},
+  {id:"bank",line:"m1sw", x:104, y:810, name:"宾士镇", en:"Bankstown", zone:"cbank", pc:2200, t:30, lbl:"top", hub:true, term:true},
   // ── Metro West 2032 ──
-  {id:"wm",  line:"west", x:150, y:556, name:"西米德", en:"Westmead", zone:"parramatta", pc:2145, t:24, lbl:"top", hub:true, term:true},
-  {id:"par", line:"west", x:206, y:568, name:"帕拉马塔", en:"Parramatta", zone:"parramatta", pc:2150, t:20, lbl:"bottom", hub:true},
-  {id:"sop", line:"west", x:292, y:584, name:"悉尼奥林匹克公园", en:"Sydney Olympic Park", zone:"parramatta", pc:2127, t:16, lbl:"top"},
-  {id:"ns",  line:"west", x:364, y:600, name:"北斯特拉斯菲尔德", en:"North Strathfield", zone:"canadabay", pc:2137, t:14, lbl:"bottom"},
-  {id:"bn",  line:"west", x:428, y:612, name:"北宝活", en:"Burwood North", zone:"burwood", pc:2134, t:12, lbl:"top"},
-  {id:"fd",  line:"west", x:490, y:620, name:"五码头", en:"Five Dock", zone:"canadabay", pc:2046, t:9, lbl:"bottom"},
-  {id:"tb",  line:"west", x:560, y:624, name:"海湾区", en:"The Bays", zone:"sydney", pc:2039, t:5, lbl:"bottom"},
-  {id:"pyr", line:"west", x:612, y:618, name:"派蒙", en:"Pyrmont", zone:"sydney", pc:2009, t:3, lbl:"bottom"},
-  {id:"hun", line:"west", x:664, y:610, name:"亨特街", en:"Hunter St", zone:"sydney", pc:2000, t:0, lbl:"top", hub:true, term:true},
+  {id:"wm",  line:"west", x:96, y:556, name:"西米德", en:"Westmead", zone:"parramatta", pc:2145, t:24, lbl:"top", hub:true, term:true},
+  {id:"par", line:"west", x:150, y:556, name:"帕拉马塔", en:"Parramatta", zone:"parramatta", pc:2150, t:20, lbl:"bottom", hub:true},
+  {id:"sop", line:"west", x:214, y:556, name:"悉尼奥林匹克公园", en:"Sydney Olympic Park", zone:"parramatta", pc:2127, t:16, lbl:"top"},
+  {id:"ns",  line:"west", x:278, y:556, name:"北斯特拉斯菲尔德", en:"North Strathfield", zone:"canadabay", pc:2137, t:14, lbl:"bottom"},
+  {id:"bn",  line:"west", x:342, y:556, name:"北宝活", en:"Burwood North", zone:"burwood", pc:2134, t:12, lbl:"top"},
+  {id:"fd",  line:"west", x:406, y:556, name:"五码头", en:"Five Dock", zone:"canadabay", pc:2046, t:9, lbl:"bottom"},
+  {id:"tb",  line:"west", x:470, y:556, name:"海湾区", en:"The Bays", zone:"sydney", pc:2039, t:5, lbl:"top"},
+  {id:"pyr", line:"west", x:524, y:556, name:"派蒙", en:"Pyrmont", zone:"sydney", pc:2009, t:3, lbl:"bottom"},
+  {id:"hun", line:"west", x:578, y:556, name:"亨特街", en:"Hunter St", zone:"sydney", pc:2000, t:0, lbl:"top", hub:true, term:true},
   // ── 机场线 2027 ──
-  {id:"stm", line:"air", x:66, y:400, name:"圣玛丽", en:"St Marys", zone:"penrith", pc:2760, t:52, tNote:"经 T1 换乘", lbl:"right", hub:true, term:true},
-  {id:"oh",  line:"air", x:72, y:478, name:"果园山", en:"Orchard Hills", zone:"penrith", pc:2748, t:57, tNote:"经 T1 换乘", lbl:"right"},
-  {id:"lud", line:"air", x:78, y:556, name:"卢登纳姆", en:"Luddenham", zone:"penrith", pc:2745, t:61, tNote:"经 T1 换乘", lbl:"right"},
-  {id:"abp", line:"air", x:84, y:634, name:"机场商务园", en:"Airport Business Park", zone:"liverpool", pc:2555, t:65, tNote:"经 T1 换乘", lbl:"right"},
-  {id:"att", line:"air", x:92, y:712, name:"机场航站楼", en:"Airport Terminal", zone:"liverpool", pc:2555, t:67, tNote:"经 T1 换乘", lbl:"right", hub:true},
-  {id:"bra", line:"air", x:104, y:790, name:"布拉德菲尔德", en:"Bradfield", zone:"liverpool", pc:2556, t:70, tNote:"经 T1 换乘", lbl:"right", term:true},
+  {id:"stm", line:"air", x:96, y:300, name:"圣玛丽", en:"St Marys", zone:"penrith", pc:2760, t:52, tNote:"经 T1 换乘", lbl:"right", hub:true, term:true},
+  {id:"oh",  line:"air", x:52, y:400, name:"果园山", en:"Orchard Hills", zone:"penrith", pc:2748, t:57, tNote:"经 T1 换乘", lbl:"right"},
+  {id:"lud", line:"air", x:52, y:460, name:"卢登纳姆", en:"Luddenham", zone:"penrith", pc:2745, t:61, tNote:"经 T1 换乘", lbl:"right"},
+  {id:"abp", line:"air", x:52, y:520, name:"机场商务园", en:"Airport Business Park", zone:"liverpool", pc:2555, t:65, tNote:"经 T1 换乘", lbl:"right"},
+  {id:"att", line:"air", x:52, y:590, name:"机场航站楼", en:"Airport Terminal", zone:"liverpool", pc:2555, t:67, tNote:"经 T1 换乘", lbl:"right", hub:true},
+  {id:"bra", line:"air", x:52, y:655, name:"布拉德菲尔德", en:"Bradfield", zone:"liverpool", pc:2556, t:70, tNote:"经 T1 换乘", lbl:"right", term:true},
 ];
 
 // 按行政区(LGA)划分
@@ -403,22 +411,14 @@ function roundedPath(pts, r, close){
   return d+`L${pts[n-1][0]},${pts[n-1][1]}`;
 }
 
-// ════════ 底图：水域 ════════
+// ════════ 底图：示意水系（东京风格极简海港带） ════════
 const gWater = el("g",{});
-el("path",{d:"M780,536 C720,548 690,556 656,576 C620,597 596,610 566,622 C588,634 620,640 656,632 C700,622 740,600 780,588 Z",
-  fill:"#bcd9e8", opacity:"0.55"},gWater);
-const wLbl=el("text",{x:712,y:566,"font-size":"9.5",fill:"#5b8aa6","font-style":"italic",opacity:"0.9"},gWater);
+el("rect",{x:560,y:498,width:220,height:13,rx:6.5,fill:"#cfe3f0",opacity:"0.85"},gWater);
+const wLbl=el("text",{x:566,y:494,"font-size":"9",fill:"#7da7c4","font-style":"italic",opacity:"0.95"},gWater);
 wLbl.textContent="Sydney Harbour";
 
-// ════════ 区域 ════════
+// ════════ 区域（沿线胶囊色带，绘制在 ROUTES 定义后填充） ════════
 const gZones = el("g",{});
-for(const zid in ZONES){
-  const z=ZONES[zid];
-  el("path",{d:roundedPath(z.pts,34,true), fill:z.color, "fill-opacity":"0.065",
-    stroke:z.color,"stroke-opacity":"0.5","stroke-width":"1.4","stroke-dasharray":"6 5"},gZones);
-  const t=el("text",{x:z.lx,y:z.ly,"font-size":"11",fill:z.color,class:"zoneLabel",opacity:"0.55"},gZones);
-  t.textContent=z.name;
-}
 
 // ════════ 线路 ════════
 const ROUTES = {
@@ -427,11 +427,54 @@ const ROUTES = {
   air: ["stm","oh","lud","abp","att","bra"],
   west:["wm","par","sop","ns","bn","fd","tb","pyr","hun"],
 };
+// ── 区域胶囊带：沿每条线路把同一 LGA 的连续站段画成半透明色带 ──
+{
+  const best={};   // zid → 最长段（供标注）
+  for(const key in ROUTES){
+    const ids=ROUTES[key]; let i=0;
+    while(i<ids.length){
+      let j=i; const z=$id(ids[i]).zone;
+      while(j+1<ids.length && $id(ids[j+1]).zone===z) j++;
+      const pts=ids.slice(i,j+1).map(id=>[$id(id).x,$id(id).y]);
+      const Z=ZONES[z];
+      const d = pts.length===1
+        ? `M${pts[0][0]-1},${pts[0][1]} L${pts[0][0]+1},${pts[0][1]}`
+        : roundedPath(pts,14,false);
+      el("path",{d,fill:"none",stroke:Z.color,"stroke-width":"54","stroke-linecap":"round",
+        "stroke-linejoin":"round","stroke-opacity":"0.09"},gZones);
+      const len=j-i, mid=pts[Math.floor((pts.length-1)/2)];
+      const horiz=Math.abs(pts[pts.length-1][1]-pts[0][1])<12;
+      if(!best[z]||len>best[z].len) best[z]={len,mid,horiz};
+      i=j+1;
+    }
+  }
+  // 分区名标注：横向长段自动放段下方；其余手调位置；单站小区不标（详情卡有）
+  const ZLBL={ blacktown:[208,92], parramatta:[230,610], hills:[196,296], willoughby:[694,332],
+    northsyd:[694,452], sydney:[536,660], innerwest:[462,772],
+    penrith:[140,352], liverpool:[160,716] };
+  for(const z in best){
+    const Z=ZONES[z], R=best[z];
+    let x,y;
+    if(ZLBL[z]){ [x,y]=ZLBL[z]; }
+    else if(R.horiz && R.len>=1){ x=R.mid[0]; y=R.mid[1]+46; }
+    else continue;
+    const t=el("text",{x,y,"text-anchor":"middle","font-size":"10.5",
+      fill:Z.color,class:"zoneLabel",opacity:"0.55"},gZones);
+    t.textContent=Z.name;
+  }
+}
 const gLines = el("g",{});
+// 概示图拐点：在某站之后插入角点（保持八向直线+圆角，东京风格）
+const BENDS = { m1sw:{syd:[544,810]}, air:{stm:[52,344]} };
 function drawRoute(key, tag){
   const L=LINES[key];
-  const pts=ROUTES[key].map(id=>{const s=$id(id);return [s.x,s.y];});
-  const d=roundedPath(pts,16,false);
+  const bd=BENDS[key]||{};
+  const pts=[];
+  for(const id of ROUTES[key]){
+    const s=$id(id); pts.push([s.x,s.y]);
+    if(bd[id]) pts.push(bd[id]);
+  }
+  const d=roundedPath(pts,14,false);
   // 白色描边衬底 → 更精致
   el("path",{d,fill:"none",stroke:"#fff","stroke-width":L.open?10.5:9,
     "stroke-linecap":"round","stroke-linejoin":"round",opacity:"0.85"},gLines);
@@ -439,7 +482,7 @@ function drawRoute(key, tag){
     "stroke-linecap":"round","stroke-linejoin":"round",
     ...(L.open?{}:{"stroke-dasharray":"12 9"})},gLines);
   if(tag){
-    const mid=$id(ROUTES[key][Math.floor(ROUTES[key].length/2)]);
+    const mid=$id(tag.at || ROUTES[key][Math.floor(ROUTES[key].length/2)]);
     const g=el("g",{},gLines);
     const w=tag.text.length*7+18;
     el("rect",{x:mid.x+tag.dx-w/2,y:mid.y+tag.dy-12,width:w,height:22,rx:11,
@@ -455,9 +498,9 @@ const f=el("filter",{id:"softShadow",x:"-40%",y:"-40%",width:"180%",height:"180%
 el("feDropShadow",{dx:"0",dy:"1.5",stdDeviation:"2","flood-opacity":"0.3"},f);
 
 drawRoute("m1");
-drawRoute("m1sw",{text:"2026 年通车",dx:0,dy:44});
-drawRoute("air",{text:"2027 年通车",dx:70,dy:-32});
-drawRoute("west",{text:"2032 年通车",dx:-24,dy:40});
+drawRoute("m1sw",{text:"2026 年通车",dx:0,dy:-38});
+drawRoute("air",{text:"2027 年通车",at:"bra",dx:0,dy:44});
+drawRoute("west",{text:"2032 年通车",at:"fd",dx:0,dy:-40});
 
 // ── 换乘接驳通道 ──
 const CONNECTORS=[
@@ -485,9 +528,9 @@ for(const s of STATIONS){
   const g=el("g",{class:"stn"},gStns);
   const L=LINES[s.line], open=L.open;
   if(s.hub){
-    el("circle",{cx:s.x,cy:s.y,r:8.5,fill:"#fff",stroke:L.color,"stroke-width":"2.2",
+    // 东京风格换乘/枢纽站：白底粗环大圆
+    el("circle",{cx:s.x,cy:s.y,r:8.5,fill:"#fff",stroke:"#26262a","stroke-width":"2.6",
       filter:"url(#softShadow)",...(open?{}:{"stroke-dasharray":"3.2 2.4"})},g);
-    el("circle",{cx:s.x,cy:s.y,r:4,fill:L.color},g);
   } else {
     el("circle",{cx:s.x,cy:s.y,r:5.6,fill:"#fff",stroke:L.color,
       "stroke-width":"2.6",filter:"url(#softShadow)",
@@ -665,6 +708,7 @@ function lgaCardHtml(s){
 }
 
 // ════════ 行程规划 ════════
+const LL={tal:[-33.692,150.906],rh:[-33.683,150.924],kel:[-33.713,150.936],bv:[-33.728,150.944],nw:[-33.733,150.962],hs:[-33.727,150.986],ch:[-33.729,151.005],cb:[-33.737,151.033],epp:[-33.7725,151.082],mu:[-33.7765,151.119],mp:[-33.777,151.124],nr:[-33.793,151.134],cw:[-33.797,151.181],cn:[-33.827,151.203],vc:[-33.84,151.207],bar:[-33.863,151.202],mpl:[-33.868,151.211],gad:[-33.875,151.209],cen:[-33.883,151.206],wat:[-33.899,151.208],syd:[-33.917,151.167],mar:[-33.911,151.155],dh:[-33.904,151.141],hp:[-33.909,151.131],can:[-33.912,151.119],cam:[-33.91,151.103],bel:[-33.918,151.09],lak:[-33.92,151.076],wp:[-33.923,151.067],pb:[-33.929,151.052],bank:[-33.918,151.035],wm:[-33.807,150.987],par:[-33.817,151.004],sop:[-33.847,151.071],ns:[-33.859,151.0885],bn:[-33.87,151.104],fd:[-33.867,151.129],tb:[-33.868,151.18],pyr:[-33.87,151.194],hun:[-33.867,151.209],stm:[-33.762,150.775],oh:[-33.79,150.743],lud:[-33.83,150.712],abp:[-33.866,150.732],att:[-33.878,150.74],bra:[-33.895,150.748]};
 // 建图：相邻站权重 = 至市中心时间差（分钟），另加换乘接驳边
 const ADJ={};
 function addEdge(a,b,t,line){
@@ -677,6 +721,25 @@ for(const key in ROUTES){
     addEdge(ids[i],ids[i+1],Math.max(1,Math.abs($id(ids[i]).t-$id(ids[i+1]).t)),key);
 }
 for(const c of CONNECTORS) addEdge(c.a,c.b,c.t,c.kind);
+
+// ── Opal 票价（成人，2026 约值）：地铁/城铁按乘车距离分档，非高峰约7折 ──
+const FARE_RAIL=[[10,4.30,3.01],[20,5.34,3.74],[35,6.14,4.30],[65,8.22,5.75],[1e9,10.57,7.40]];
+function llKm(a,b){ const A=LL[a],B=LL[b];
+  return Math.hypot((A[1]-B[1])*92.5,(A[0]-B[0])*111.1); }
+function fareFor(r){
+  let km=0;
+  for(let i=0;i<r.edges.length;i++){
+    if(r.edges[i].line==="walk") continue;      // 步行换乘不计程
+    km+=llKm(r.nodes[i],r.nodes[i+1]);          // T1 接驳与地铁同为轨道计程
+  }
+  for(const [mx,pk,off] of FARE_RAIL) if(km<=mx) return {pk,off,km};
+}
+function isPeakNow(){   // 高峰=工作日 6:30–10:00 与 15:00–19:00；周末/公共假期全天非高峰
+  const n=new Date(), d=n.getDay();
+  if(d===0||d===6) return false;
+  const m=n.getHours()*60+n.getMinutes();
+  return (m>=390&&m<600)||(m>=900&&m<1140);
+}
 
 function findRoute(from,to){ // Dijkstra
   const dist={},prev={},prevE={},Q=new Set(Object.keys(ADJ));
@@ -714,9 +777,18 @@ function clearPlan(){
   baseGroups.forEach(g=>g.classList.remove("dim"));
   document.getElementById("routePill").classList.remove("show");
 }
+// 行程高亮沿概示图拐点走
+const BENDPAIRS={"syd|mar":[544,810],"mar|syd":[544,810],"stm|oh":[52,344],"oh|stm":[52,344]};
 function drawJourney(r){
-  const pts=r.nodes.map(id=>{const s=$id(id);return [s.x,s.y];});
-  const d=roundedPath(pts,16,false);
+  const pts=[];
+  for(let i=0;i<r.nodes.length;i++){
+    const s=$id(r.nodes[i]); pts.push([s.x,s.y]);
+    if(i<r.nodes.length-1){
+      const b=BENDPAIRS[r.nodes[i]+"|"+r.nodes[i+1]];
+      if(b) pts.push(b);
+    }
+  }
+  const d=roundedPath(pts,14,false);
   baseGroups.forEach(g=>g.classList.add("dim"));
   el("path",{d,fill:"none",stroke:"#fff","stroke-width":"15",
     "stroke-linecap":"round","stroke-linejoin":"round",opacity:"0.9"},gRoute);
@@ -783,6 +855,13 @@ function showJourney(r){
     </div>
     <div class="jTotal"><span class="num">${r.total}</span><span class="unit">分钟（约）</span>
       ${est?'<span class="est">⚠ 预估</span>':''}</div>
+    ${(()=>{ const f=fareFor(r), pk=isPeakNow(); return `
+    <div class="fareCard">💳 Opal 成人单程约
+      <b class="fv${pk?' on':''}">高峰 $${f.pk.toFixed(2)}</b>
+      <b class="fv${pk?'':' on'}">非高峰 $${f.off.toFixed(2)}</b>
+      <span class="cur">· 当前${pk?"高峰":"非高峰"}</span>
+      <div class="fnote">高峰 = 工作日 6:30–10:00 与 15:00–19:00（按刷卡上车时间）；周末与公共假期全天非高峰。当日封顶约 $9.4（工作日约 $18.7），票价为 2026 约值。</div>
+    </div>`; })()}
     <div>${segHtml}</div>
     <button id="clearRoute">✕ 清除路线</button>`;
   document.getElementById("sFoot").textContent =
@@ -853,11 +932,11 @@ svg.addEventListener("click",()=>{
 });
 
 // ════════ 缩放 / 平移 ════════
-const VB={x:0,y:0,w:780,h:1000};
+const VB={x:0,y:26,w:780,h:850};
 let vb={...VB};
 const apply=()=>svg.setAttribute("viewBox",`${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
 function zoomAt(f,cx,cy){
-  const nw=Math.min(Math.max(vb.w*f,170),1700), nh=nw*(VB.h/VB.w);
+  const nw=Math.min(Math.max(vb.w*f,120),1700), nh=nw*(VB.h/VB.w);
   vb.x=cx-(cx-vb.x)*(nw/vb.w); vb.y=cy-(cy-vb.y)*(nh/vb.h);
   vb.w=nw; vb.h=nh; apply();
 }
@@ -869,16 +948,48 @@ document.getElementById("zreset").onclick=()=>{vb={...VB};apply();};
 svg.addEventListener("wheel",e=>{e.preventDefault();
   const p=pt(e.clientX,e.clientY); zoomAt(e.deltaY>0?1.12:0.9,p.x,p.y);},{passive:false});
 
-let drag=null,pinch=null,dragMoved=false;
-svg.addEventListener("pointerdown",e=>{dragMoved=false;drag={x:e.clientX,y:e.clientY,vx:vb.x,vy:vb.y};});
+// 双击空白 = 放大；双击后第二指不松开、上下拖动 = 连续缩放（上=放大 下=缩小）
+let drag=null,pinch=null,dragMoved=false,dtz=null,lastTap={t:-1e4,x:0,y:0};
+svg.addEventListener("pointerdown",e=>{
+  dragMoved=false;
+  const now=performance.now();
+  const onStn=e.target.closest && e.target.closest(".stn");
+  if(!onStn && !pinch && now-lastTap.t<350 &&
+     Math.hypot(e.clientX-lastTap.x,e.clientY-lastTap.y)<32){
+    const r=svg.getBoundingClientRect();
+    dtz={y0:e.clientY, w0:vb.w, moved:false, px:pt(e.clientX,e.clientY),
+         rx:(e.clientX-r.left)/r.width, ry:(e.clientY-r.top)/r.height};
+    lastTap={t:-1e4,x:0,y:0};
+    return;
+  }
+  lastTap={t:now,x:e.clientX,y:e.clientY};
+  drag={x:e.clientX,y:e.clientY,vx:vb.x,vy:vb.y};
+});
 svg.addEventListener("pointermove",e=>{
+  if(dtz){
+    const dy=e.clientY-dtz.y0;
+    if(Math.abs(dy)>5) dtz.moved=true;
+    if(dtz.moved){
+      dragMoved=true;
+      const nw=Math.min(Math.max(dtz.w0*Math.exp(dy/160),120),1700), nh=nw*(VB.h/VB.w);
+      vb.x=dtz.px.x-dtz.rx*nw; vb.y=dtz.px.y-dtz.ry*nh;
+      vb.w=nw; vb.h=nh; apply();
+    }
+    return;
+  }
   if(!drag||pinch)return;
   if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>6) dragMoved=true;
   const r=svg.getBoundingClientRect();
   vb.x=drag.vx-(e.clientX-drag.x)/r.width*vb.w;
   vb.y=drag.vy-(e.clientY-drag.y)/r.height*vb.h; apply();
 });
-window.addEventListener("pointerup",()=>drag=null);
+window.addEventListener("pointerup",()=>{
+  if(dtz){
+    if(!dtz.moved) zoomAt(0.55,dtz.px.x,dtz.px.y);   // 纯双击 → 放大一级
+    dragMoved=true; dtz=null;
+  }
+  drag=null;
+});
 svg.addEventListener("touchstart",e=>{
   if(e.touches.length===2){
     const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,
@@ -893,7 +1004,7 @@ svg.addEventListener("touchmove",e=>{
     const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,
                        e.touches[0].clientY-e.touches[1].clientY);
     const c=pt(pinch.cx,pinch.cy);
-    const nw=Math.min(Math.max(pinch.w*(pinch.d/d),170),1700);
+    const nw=Math.min(Math.max(pinch.w*(pinch.d/d),120),1700);
     vb.x=c.x-(c.x-vb.x)*(nw/vb.w); vb.y=c.y-(c.y-vb.y)*(nw*(VB.h/VB.w)/vb.h);
     vb.w=nw; vb.h=nw*(VB.h/VB.w); apply();
   }
