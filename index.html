@@ -9,6 +9,8 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <meta name="apple-mobile-web-app-title" content="悉尼 Metro 租房助手">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
 <title>悉尼 Metro 租房助手</title>
 <style>
   :root {
@@ -228,6 +230,7 @@
   .fareCard .cur { font-size:10px; color:#8e8e93; font-weight:600; }
   .fareCard .fnote { font-size:10px; color:#8e8e93; font-weight:500;
     line-height:1.55; margin-top:5px; }
+  #map text { font-family:'Montserrat','Helvetica Neue',Arial,sans-serif; }
 </style>
 </head>
 <body>
@@ -535,16 +538,26 @@ const gLines = el("g",{});
 // 概示图拐点：在某站之后插入角点（保持八向直线+圆角，东京风格）
 const BENDS = { m1sw:{syd:[524,830]}, air:{stm:[52,344]}, l1:{cen:[590,682],dgr:[442,830]},
   l4:{cbh:[150,502],chu:[168,556],par:[174,580],rbt:[254,580]}, l3:{mop:[688,752]} };
-const ROUTE_OFF2={ l4:[0,6] };   // 与 Metro West 共线段错位
+const ROUTE_OFF2={ l2:-2.2, l3:2.2, l4:5 };   // 沿线垂直偏移标量(官方式并行条带)
+function offPts(pts,d){
+  if(!d) return pts;
+  const n=pts.length,out=[];
+  for(let i=0;i<n;i++){
+    const a=pts[Math.max(0,i-1)], b=pts[Math.min(n-1,i+1)];
+    const dx=b[0]-a[0], dy=b[1]-a[1], L=Math.hypot(dx,dy)||1;
+    out.push([pts[i][0]+dy/L*d, pts[i][1]-dx/L*d]);
+  }
+  return out;
+}
 function drawRoute(key, tag){
   const L=LINES[key];
   const bd=BENDS[key]||{};
-  const off=ROUTE_OFF2[key]||[0,0];
-  const pts=[];
+  let pts=[];
   for(const id of ROUTES[key]){
-    const s=$id(id); pts.push([s.x+off[0],s.y+off[1]]);
-    if(bd[id]) pts.push([bd[id][0]+off[0],bd[id][1]+off[1]]);
+    const s=$id(id); pts.push([s.x,s.y]);
+    if(bd[id]) pts.push([bd[id][0],bd[id][1]]);
   }
+  pts=offPts(pts, ROUTE_OFF2[key]||0);
   const d=roundedPath(pts,14,false);
   const wMain=L.lr?4.5:(L.open?7:5.5);
   el("path",{d,fill:"none",stroke:"#fff","stroke-width":wMain+3.2,
@@ -603,7 +616,7 @@ function labelDims(s,sc){
   sc=sc||s._lsc||1;
   const lr=LINES[s.line].lr;
   const fs=(s.hub?10:(lr?8.2:9.5))*sc;
-  const w=s.en.length*fs*0.56+2;
+  const w=s.en.length*fs*0.63+2;
   const h=fs*1.18;
   return {fs,w,h};
 }
@@ -634,7 +647,7 @@ for(const s of [...STATIONS].sort((a,b)=>((b.hub||0)-(a.hub||0)) ||
       ((LINES[a.line].lr?1:0)-(LINES[b.line].lr?1:0)))){
   if(isRot(s)){
     const {fs}=labelDims(s,1);
-    const Lw=s.en.length*fs*0.56+6;
+    const Lw=s.en.length*fs*0.63+6;
     OBSTX.push({x0:s.x-4,y0:s.y-10-Lw*0.707,x1:s.x+7+Lw*0.707,y1:s.y+2});
     LPOS[s.id]={rot:true};
     continue;
@@ -673,14 +686,36 @@ for(const s of [...STATIONS].sort((a,b)=>((b.hub||0)-(a.hub||0)) ||
 for(const s of STATIONS){
   const g=el("g",{class:"stn"},gStns);
   const L=LINES[s.line], open=L.open, r=stnR(s);
+  const opts=[];
+  for(const rk in ROUTES){
+    const arr=ROUTES[rk], idx=arr.indexOf(s.id);
+    if(idx<0) continue;
+    const dv=ROUTE_OFF2[rk]||0;
+    const pa=$id(arr[Math.max(0,idx-1)]), pb=$id(arr[Math.min(arr.length-1,idx+1)]);
+    const ddx=pb.x-pa.x, ddy=pb.y-pa.y, LL2=Math.hypot(ddx,ddy)||1;
+    const px=s.x+ddy/LL2*dv, py=s.y-ddx/LL2*dv;
+    if(!opts.some(p=>Math.hypot(p[0]-px,p[1]-py)<1.6)) opts.push([px,py]);
+  }
+  if(!opts.length) opts.push([s.x,s.y]);
   if(s.term && !s.hub){    // 官方风格：线路终点深色方块
-    el("rect",{x:s.x-4.5,y:s.y-4.5,width:9,height:9,rx:2.2,
+    el("rect",{x:opts[0][0]-4.5,y:opts[0][1]-4.5,width:9,height:9,rx:2.2,
       fill:"#26262a",filter:"url(#softShadow)"},g);
+  } else if(opts.length>1){   // 跨线胶囊：停靠几条并行线一眼可见
+    let e1=opts[0],e2=opts[0],dm=0;
+    for(const a of opts) for(const b of opts){
+      const dd=Math.hypot(a[0]-b[0],a[1]-b[1]);
+      if(dd>dm){dm=dd;e1=a;e2=b;}
+    }
+    const cr=s.hub?4.6:3.4;
+    el("line",{x1:e1[0],y1:e1[1],x2:e2[0],y2:e2[1],stroke:"#26262a",
+      "stroke-width":cr*2+2.6,"stroke-linecap":"round",filter:"url(#softShadow)"},g);
+    el("line",{x1:e1[0],y1:e1[1],x2:e2[0],y2:e2[1],stroke:"#fff",
+      "stroke-width":cr*2,"stroke-linecap":"round"},g);
   } else if(s.hub){
     el("circle",{cx:s.x,cy:s.y,r,fill:"#fff",stroke:"#26262a","stroke-width":"2.6",
       filter:"url(#softShadow)",...(open?{}:{"stroke-dasharray":"3.2 2.4"})},g);
   } else {
-    el("circle",{cx:s.x,cy:s.y,r,fill:"#fff",stroke:"#4a4a52",
+    el("circle",{cx:opts[0][0],cy:opts[0][1],r,fill:"#fff",stroke:"#4a4a52",
       "stroke-width":L.lr?1.6:1.9,filter:"url(#softShadow)",
       ...(open?{}:{"stroke-dasharray":"3 2.2"})},g);
   }
