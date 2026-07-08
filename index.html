@@ -518,7 +518,7 @@ const ROUTES = {
     }
   }
   // 分区名标注：横向长段自动放段下方；其余手调位置；单站小区不标（详情卡有）
-  const ZLBL={ blacktown:[208,92], parramatta:[230,610], innerwest:[330,764], randwick:[724,888], sydney:[560,646], hills:[196,296], willoughby:[694,332],
+  const ZLBL={ blacktown:[208,92], parramatta:[230,610], innerwest:[290,808], randwick:[724,888], sydney:[560,646], hills:[196,296], willoughby:[694,332],
     northsyd:[694,452],
     penrith:[96,378], liverpool:[160,716] };
   for(const z in best){
@@ -594,7 +594,7 @@ el("feDropShadow",{dx:"0",dy:"1.5",stdDeviation:"2","flood-opacity":"0.3"},f);
 
 drawRoute("l1"); drawRoute("l2"); drawRoute("l3"); drawRoute("l4");
 drawRoute("m1");
-drawRoute("m1sw",{text:"2026 年通车",dx:0,dy:-38});
+drawRoute("m1sw",{text:"2026 年通车",dx:-30,dy:-20});
 drawRoute("air",{text:"2027 年通车",at:"bra",dx:0,dy:44});
 drawRoute("west",{text:"2032 年通车",at:"fd",dx:0,dy:-40});
 
@@ -630,11 +630,32 @@ function labelDims(s,sc){
   return {fs,w,h};
 }
 const LPAD=1.2;
-function lblHit(b){ for(const o of OBSTX){
+// near: {x,y,r} 排除以(x,y)为圆心r半径内的障碍——标签近端本就贴着自身站点/线体，不算冲突
+function isNear(o,near){ if(!near) return false;
+  const cx=(o.x0+o.x1)/2, cy=(o.y0+o.y1)/2;
+  return Math.hypot(cx-near.x,cy-near.y)<near.r; }
+function lblHit(b,near){ for(const o of OBSTX){ if(isNear(o,near)) continue;
   if(b.x0-LPAD<o.x1 && b.x1+LPAD>o.x0 && b.y0-LPAD<o.y1 && b.y1+LPAD>o.y0) return true; } return false; }
-function lblOverlap(b){ let a=0; for(const o of OBSTX){
+function lblOverlap(b,near){ let a=0; for(const o of OBSTX){ if(isNear(o,near)) continue;
   const w=Math.min(b.x1,o.x1)-Math.max(b.x0,o.x0), h=Math.min(b.y1,o.y1)-Math.max(b.y0,o.y0);
   if(w>0&&h>0) a+=w*h; } return a; }
+// 45°旋转标签的精确碰撞：用分离轴定理(SAT)直接比较"旋转前矩形绕站点旋转-45°后的真实四角"，
+// 而不是它的正交外接方框——后者因为对角占用了过大的空间，会在旋转标签相邻但并不真正
+// 相交时产生大量假冲突。轴对齐障碍(站点圆点/线体/分区标签/其它站名)的四角同样可以直接
+// 参与同一套 SAT 判断，四条分离轴固定为 {水平, 垂直, -45°, 45°}，对两类矩形都是精确的。
+function boxCorners(o){ return [[o.x0,o.y0],[o.x1,o.y0],[o.x1,o.y1],[o.x0,o.y1]]; }
+function rotCorners(x0,y0,x1,y1,cx,cy){ const k=0.70710678;
+  return [[x0,y0],[x1,y0],[x1,y1],[x0,y1]].map(([x,y])=>{
+    const dx=x-cx, dy=y-cy; return [cx+(dx+dy)*k, cy+(dy-dx)*k]; }); }
+const SAT_AXES=[[1,0],[0,1],[0.70710678,-0.70710678],[0.70710678,0.70710678]];
+function satProj(corners,ax){ let mn=Infinity,mx=-Infinity;
+  for(const [x,y] of corners){ const p=x*ax[0]+y*ax[1]; if(p<mn)mn=p; if(p>mx)mx=p; } return [mn,mx]; }
+function satHit(cA,cB,pad){ for(const ax of SAT_AXES){
+  const a=satProj(cA,ax), b=satProj(cB,ax);
+  if(a[1]+pad<b[0] || b[1]+pad<a[0]) return false; } return true; }
+function rotHit(corners,near){ for(const o of OBSTX){ if(isNear(o,near)) continue;
+  const oc = o._corners || boxCorners(o);
+  if(satHit(corners,oc,LPAD)) return true; } return false; }
 for(const s of STATIONS){ const r=stnR(s)+1.5;
   OBSTX.push({x0:s.x-r,y0:s.y-r,x1:s.x+r,y1:s.y+r}); }
 // 官方风格：水平走廊非枢纽站名 45° 斜排
@@ -649,10 +670,21 @@ function isRot(s){
   if(s.hub) return false;
   const nb=[...(NEXTS[s.id]||[])].map($id).filter(Boolean);
   if(nb.length<2) return false;
-  const horiz=nb.every(n=>Math.abs(n.y-s.y)<=4.5 && Math.abs(n.x-s.x)>=18);
-  // 东南向斜段(局部方向≈(+1,+1))：-45°站名恰好垂直于线路
+  if(nb.length===2){
+    // 逐条邻边判断（而非仅看两邻居连线），弯折点(如水平走廊转斜段处)才能正确归类
+    const edges=nb.map(n=>({dx:n.x-s.x,dy:n.y-s.y}));
+    const isH=e=>Math.abs(e.dy)<=4.5 && Math.abs(e.dx)>=9;
+    // 东南向斜段(局部方向≈(+1,+1))：-45°站名恰好垂直于线路
+    const isD=e=>Math.abs(Math.abs(e.dx)-Math.abs(e.dy))<8 && Math.abs(e.dx)>5 && e.dx*e.dy>0;
+    if(edges.every(isH)) return "h";
+    if(edges.every(isD)) return "d";
+    if(edges.every(e=>isH(e)||isD(e))) return "d"; // 水平↔斜段弯折过渡站，沿用同一 -45° 样式
+    return false;
+  }
+  // 分岔口（3+ 邻居，如 l2/l3 共用站）：沿用两邻居连线方向判断，避免分岔方向干扰
   const a=nb[0], b=nb[1];
   const dx=b.x-a.x, dy=b.y-a.y;
+  const horiz=Math.abs(dy)<=4.5 && Math.abs(dx)>=18;
   const seDiag=Math.abs(Math.abs(dx)-Math.abs(dy))<8 && Math.abs(dx)>12 && dx*dy>0;
   if(horiz) return "h";
   if(seDiag) return "d";
@@ -663,23 +695,44 @@ for(const s of [...STATIONS].sort((a,b)=>((b.hub||0)-(a.hub||0)) ||
       ((LINES[a.line].lr?1:0)-(LINES[b.line].lr?1:0)))){
   const rotK=isRot(s);
   if(rotK){
-    const {fs}=labelDims(s,1);
+    const {fs,w,h}=labelDims(s,1);
     const Lw=s.en.length*fs*0.63+6;
     // SE斜段一律向上右；水平走廊默认下左，label触及范围内有其他站/线路密集时翻上
     const FORCE_DOWN=new Set(["csq","pdm"]);
-    let up = rotK==="d" && !FORCE_DOWN.has(s.id);
-    if(!up && !FORCE_DOWN.has(s.id)){
+    // 与实际渲染的 text x/y 及 rotate 中心一致的旋转前局部矩形；extra 沿法线方向进一步外推，
+    // 用于两个方向都被占用时让开
+    const mkLocal=(up,extra)=>{ const ex=extra*0.707;
+      if(up){ const ax=s.x+4.5+ex, ay=s.y-4.5-ex; return {x0:ax,y0:ay-h,x1:ax+w,y1:ay,cx:s.x,cy:s.y}; }
+      const ax=s.x-4.5-ex, ay=s.y+8+ex; return {x0:ax-w,y0:ay-h,x1:ax,y1:ay,cx:s.x,cy:s.y+5};
+    };
+    const mkCorners=(up,extra)=>{ const L=mkLocal(up,extra); return rotCorners(L.x0,L.y0,L.x1,L.y1,L.cx,L.cy); };
+    let preferUp = rotK==="d" && !FORCE_DOWN.has(s.id);
+    if(!preferUp && !FORCE_DOWN.has(s.id)){
       const reach=Lw*0.707+12;
-      up = STATIONS.some(o=>o!==s && Math.abs(o.x-s.x)<Math.min(60,reach) &&
+      preferUp = STATIONS.some(o=>o!==s && Math.abs(o.x-s.x)<Math.min(60,reach) &&
                          o.y>s.y+8 && o.y<s.y+reach);
     }
-    if(up){
-      OBSTX.push({x0:s.x-4,y0:s.y-11-Lw*0.707,x1:s.x+8+Lw*0.707,y1:s.y+2});
-      LPOS[s.id]={rot:true,up:true};
-    } else {
-      OBSTX.push({x0:s.x-8-Lw*0.707,y0:s.y+3,x1:s.x+4,y1:s.y+12+Lw*0.707});
-      LPOS[s.id]={rot:true};
+    // 真正按已占用区域检测碰撞（SAT 精确判断真实旋转矩形，而非过大的外接方框）。
+    // 优先沿法线方向外推首选朝向；仍冲突才翻转方向。忽略站点自身圆点/邻近线体采样点。
+    const near={x:s.x,y:s.y,r:18};
+    const canFlip = !FORCE_DOWN.has(s.id);
+    const collide=(up,ex)=> rotHit(mkCorners(up,ex),near);
+    let up=preferUp, extra=0, placed=FORCE_DOWN.has(s.id); // 手工强制朝向的站不做外推搜索，维持原有精调位置
+    if(!placed){
+      for(const ex of [0,8,16,26]){
+        if(!collide(preferUp,ex)){ up=preferUp; extra=ex; placed=true; break; }
+      }
     }
+    if(!placed && canFlip){
+      for(const ex of [0,8,16,26]){
+        if(!collide(!preferUp,ex)){ up=!preferUp; extra=ex; placed=true; break; }
+      }
+    }
+    if(!placed){ up=preferUp; extra=26; }
+    const corners=mkCorners(up,extra);
+    const xs=corners.map(c=>c[0]), ys=corners.map(c=>c[1]);
+    OBSTX.push({x0:Math.min(...xs),y0:Math.min(...ys),x1:Math.max(...xs),y1:Math.max(...ys),_rot:true,_corners:corners});
+    LPOS[s.id]={rot:true,up,extra};
     continue;
   }
   const r=stnR(s);
@@ -752,13 +805,14 @@ for(const s of STATIONS){
   const P=LPOS[s.id], D=labelDims(s);
   if(P.rot){   // 官方式 45° 斜排
     let t;
+    const ex=(P.extra||0)*0.707;
     if(P.up){
-      t=el("text",{x:s.x+4.5,y:s.y-4.5,"font-size":D.fs,
+      t=el("text",{x:s.x+4.5+ex,y:s.y-4.5-ex,"font-size":D.fs,
         transform:`rotate(-45 ${s.x} ${s.y})`,
         fill:"#26262a","font-weight":"600","paint-order":"stroke",
         stroke:"rgba(247,246,242,.92)","stroke-width":"3"},g);
     } else {
-      t=el("text",{x:s.x-4.5,y:s.y+8,"font-size":D.fs,"text-anchor":"end",
+      t=el("text",{x:s.x-4.5-ex,y:s.y+8+ex,"font-size":D.fs,"text-anchor":"end",
         transform:`rotate(-45 ${s.x} ${s.y+5})`,
         fill:"#26262a","font-weight":"600","paint-order":"stroke",
         stroke:"rgba(247,246,242,.92)","stroke-width":"3"},g);
