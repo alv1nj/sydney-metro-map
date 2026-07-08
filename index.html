@@ -552,19 +552,21 @@ function offPts(pts,d){
 function drawRoute(key, tag){
   const L=LINES[key];
   const bd=BENDS[key]||{};
-  let pts=[];
+  let pts=[], ptsSt=[];
   for(const id of ROUTES[key]){
-    const s=$id(id); pts.push([s.x,s.y]);
-    if(bd[id]) pts.push([bd[id][0],bd[id][1]]);
+    const s=$id(id); pts.push([s.x,s.y]); ptsSt.push(id);
+    if(bd[id]) { pts.push([bd[id][0],bd[id][1]]); ptsSt.push(id); } // 拐点沿用前一站的归属
   }
   pts=offPts(pts, ROUTE_OFF2[key]||0);
-  // 线体登记为标签障碍：每 10 单位取样
+  // 线体登记为标签障碍：每 10 单位取样；同时记录该采样点归属的两端站点，
+  // 供旋转标签排除"自己线体"时精确判定（而非用距离估算，避免站距不一时误判）
   for(let i=0;i<pts.length-1;i++){
     const [ax,ay]=pts[i],[bx,by]=pts[i+1];
     const sl=Math.hypot(bx-ax,by-ay), n=Math.max(1,Math.ceil(sl/10));
+    const owners=[ptsSt[i],ptsSt[i+1]];
     for(let k=0;k<=n;k++){
       const qx=ax+(bx-ax)*k/n, qy=ay+(by-ay)*k/n;
-      OBSTX.push({x0:qx-4.5,y0:qy-4.5,x1:qx+4.5,y1:qy+4.5});
+      OBSTX.push({x0:qx-4.5,y0:qy-4.5,x1:qx+4.5,y1:qy+4.5,_lineSt:owners});
     }
   }
   const d=roundedPath(pts,14,false);
@@ -630,10 +632,10 @@ function labelDims(s,sc){
   return {fs,w,h};
 }
 const LPAD=1.2;
-// near: {x,y,r} 排除以(x,y)为圆心r半径内的障碍——标签近端本就贴着自身站点/线体，不算冲突
+// near: {id} 按归属精确排除"自己"的圆点障碍与相邻线体采样点——这些本就贴着自身站点，不算冲突
+// （用归属判断而非距离估算，避免站距不一时误判——过近漏判/过远误伤相邻站）
 function isNear(o,near){ if(!near) return false;
-  const cx=(o.x0+o.x1)/2, cy=(o.y0+o.y1)/2;
-  return Math.hypot(cx-near.x,cy-near.y)<near.r; }
+  return o._id===near.id || (o._lineSt && o._lineSt.includes(near.id)); }
 function lblHit(b,near){ for(const o of OBSTX){ if(isNear(o,near)) continue;
   if(b.x0-LPAD<o.x1 && b.x1+LPAD>o.x0 && b.y0-LPAD<o.y1 && b.y1+LPAD>o.y0) return true; } return false; }
 function lblOverlap(b,near){ let a=0; for(const o of OBSTX){ if(isNear(o,near)) continue;
@@ -657,7 +659,7 @@ function rotHit(corners,near){ for(const o of OBSTX){ if(isNear(o,near)) continu
   const oc = o._corners || boxCorners(o);
   if(satHit(corners,oc,LPAD)) return true; } return false; }
 for(const s of STATIONS){ const r=stnR(s)+1.5;
-  OBSTX.push({x0:s.x-r,y0:s.y-r,x1:s.x+r,y1:s.y+r}); }
+  OBSTX.push({x0:s.x-r,y0:s.y-r,x1:s.x+r,y1:s.y+r,_id:s.id}); }
 // 官方风格：水平走廊非枢纽站名 45° 斜排
 const NEXTS={};
 for(const rk in ROUTES){ const arr=ROUTES[rk];
@@ -669,7 +671,14 @@ for(const rk in ROUTES){ const arr=ROUTES[rk];
 function isRot(s){
   if(s.hub) return false;
   const nb=[...(NEXTS[s.id]||[])].map($id).filter(Boolean);
-  if(nb.length<2) return false;
+  if(nb.length<1) return false;
+  if(nb.length===1){
+    // 终点站(仅一个邻居)：沿用与邻居同一条边的朝向判断，和线路其余站名风格保持一致
+    const e={dx:nb[0].x-s.x,dy:nb[0].y-s.y};
+    if(Math.abs(e.dy)<=4.5 && Math.abs(e.dx)>=9) return "h";
+    if(Math.abs(Math.abs(e.dx)-Math.abs(e.dy))<8 && Math.abs(e.dx)>5 && e.dx*e.dy>0) return "d";
+    return false;
+  }
   if(nb.length===2){
     // 逐条邻边判断（而非仅看两邻居连线），弯折点(如水平走廊转斜段处)才能正确归类
     const edges=nb.map(n=>({dx:n.x-s.x,dy:n.y-s.y}));
@@ -706,7 +715,8 @@ for(const s of [...STATIONS].sort((a,b)=>((b.hub||0)-(a.hub||0)) ||
       const ax=s.x-4.5-ex, ay=s.y+8+ex; return {x0:ax-w,y0:ay-h,x1:ax,y1:ay,cx:s.x,cy:s.y+5};
     };
     const mkCorners=(up,extra)=>{ const L=mkLocal(up,extra); return rotCorners(L.x0,L.y0,L.x1,L.y1,L.cx,L.cy); };
-    let preferUp = rotK==="d" && !FORCE_DOWN.has(s.id);
+    // M1 already-open trunk：无论横排/斜排一律优先朝上，保持全线站名风格统一
+    let preferUp = (rotK==="d" || s.line==="m1") && !FORCE_DOWN.has(s.id);
     if(!preferUp && !FORCE_DOWN.has(s.id)){
       const reach=Lw*0.707+12;
       preferUp = STATIONS.some(o=>o!==s && Math.abs(o.x-s.x)<Math.min(60,reach) &&
@@ -714,7 +724,7 @@ for(const s of [...STATIONS].sort((a,b)=>((b.hub||0)-(a.hub||0)) ||
     }
     // 真正按已占用区域检测碰撞（SAT 精确判断真实旋转矩形，而非过大的外接方框）。
     // 优先沿法线方向外推首选朝向；仍冲突才翻转方向。忽略站点自身圆点/邻近线体采样点。
-    const near={x:s.x,y:s.y,r:18};
+    const near={id:s.id};
     const canFlip = !FORCE_DOWN.has(s.id);
     const collide=(up,ex)=> rotHit(mkCorners(up,ex),near);
     let up=preferUp, extra=0, placed=FORCE_DOWN.has(s.id); // 手工强制朝向的站不做外推搜索，维持原有精调位置
