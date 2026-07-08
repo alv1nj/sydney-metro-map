@@ -519,7 +519,7 @@ const ROUTES = {
   }
   // 分区名标注：横向长段自动放段下方；其余手调位置；单站小区不标（详情卡有）
   const ZLBL={ blacktown:[208,92], parramatta:[230,610], innerwest:[290,808], randwick:[724,888], sydney:[560,646], hills:[196,296], willoughby:[694,332],
-    northsyd:[694,452],
+    northsyd:[694,452], cbank:[190,899],
     penrith:[96,378], liverpool:[160,716] };
   for(const z in best){
     const Z=ZONES[z], R=best[z];
@@ -670,6 +670,9 @@ for(const rk in ROUTES){ const arr=ROUTES[rk];
   } }
 function isRot(s){
   if(s.hub) return false;
+  // L4 帕拉马塔环线拐弯多、方向不单一，全线统一走普通横排风格（与环线其余站一致），
+  // 不与个别恰好水平对齐的站(如 Prince Alfred Square)混用 45° 斜排造成风格不一
+  if(s.line==="l4") return false;
   const nb=[...(NEXTS[s.id]||[])].map($id).filter(Boolean);
   if(nb.length<1) return false;
   if(nb.length===1){
@@ -715,9 +718,12 @@ for(const s of [...STATIONS].sort((a,b)=>((b.hub||0)-(a.hub||0)) ||
       const ax=s.x-4.5-ex, ay=s.y+8+ex; return {x0:ax-w,y0:ay-h,x1:ax,y1:ay,cx:s.x,cy:s.y+5};
     };
     const mkCorners=(up,extra)=>{ const L=mkLocal(up,extra); return rotCorners(L.x0,L.y0,L.x1,L.y1,L.cx,L.cy); };
-    // M1 already-open trunk：无论横排/斜排一律优先朝上，保持全线站名风格统一
-    let preferUp = (rotK==="d" || s.line==="m1") && !FORCE_DOWN.has(s.id);
-    if(!preferUp && !FORCE_DOWN.has(s.id)){
+    // M1/west 等横向干线：无论横排/斜排一律优先朝上，保持全线风格统一；
+    // west 线正好在 L1 城区段正上方，朝上同时也让两线的标签彼此背向、不再打架。
+    // m1sw（南延，图中最底部）反过来一律优先朝下——上方是内西区/L1 密集区，下方是空白页边。
+    const FORCE_LINE_DOWN = s.line==="m1sw";
+    let preferUp = (rotK==="d" || s.line==="m1" || s.line==="west") && !FORCE_DOWN.has(s.id) && !FORCE_LINE_DOWN;
+    if(!preferUp && !FORCE_DOWN.has(s.id) && !FORCE_LINE_DOWN){
       const reach=Lw*0.707+12;
       preferUp = STATIONS.some(o=>o!==s && Math.abs(o.x-s.x)<Math.min(60,reach) &&
                          o.y>s.y+8 && o.y<s.y+reach);
